@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+  client-backend:
+    image: client:0.0.1
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - trello_pg
+    environment:
+      - SERVER_PORT= 8080
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://trello_pg/${DB_NAME}
+
+  trello_pg:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - db_volume:/var/lib/postgresql/data
+
+volumes:
+  db_volume:

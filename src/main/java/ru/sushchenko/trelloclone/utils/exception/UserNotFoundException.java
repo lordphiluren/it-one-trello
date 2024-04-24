@@ -1,0 +1,17 @@
+package ru.sushchenko.trelloclone.utils.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+@ResponseStatus(code = HttpStatus.NOT_FOUND)
+public class UserNotFoundException extends RestException {
+    private static final String USERNAME_PREFIX = "User wasn't found by username: %s";
+    private static final String ID_PREFIX = "User wasn't found by id: %d";
+
+    public UserNotFoundException(String username) {
+        super(String.format(USERNAME_PREFIX, username));
+    }
+    public UserNotFoundException(Long id) {
+        super(String.format(ID_PREFIX, id));
+    }
+}
