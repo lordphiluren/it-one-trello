@@ -7,6 +7,7 @@ import ru.sushchenko.trelloclone.entity.enums.Status;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,9 +18,9 @@ import java.util.Set;
 @Table(name = "task")
 public class Task {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Long id;
+    private UUID id;
     @Column(name = "name", nullable = false)
     private String name;
     @Column(name = "description")

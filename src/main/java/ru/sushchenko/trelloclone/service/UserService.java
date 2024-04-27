@@ -1,10 +1,14 @@
 package ru.sushchenko.trelloclone.service;
 
-import ru.sushchenko.trelloclone.dto.UserRequest;
-import ru.sushchenko.trelloclone.dto.UserResponse;
+import ru.sushchenko.trelloclone.dto.user.UserRequest;
+import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
 
+import java.util.Set;
+import java.util.UUID;
+
 public interface UserService {
-    UserResponse getUserById(Long id);
-    UserResponse updateUserById(Long id, UserRequest userDto, User currentUser);
+    UserResponse getUserById(UUID id);
+    UserResponse updateUserById(UUID id, UserRequest userDto, User currentUser);
+    Set<User> getUsersByIdIn(Set<UUID> ids);
 }

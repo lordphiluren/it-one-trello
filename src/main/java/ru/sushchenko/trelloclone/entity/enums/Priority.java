@@ -1,5 +1,14 @@
 package ru.sushchenko.trelloclone.entity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@AllArgsConstructor
+@Getter
 public enum Priority {
-    LOW, MEDIUM, HIGH, VERY_HIGH
+    LOW("Low"),
+    MEDIUM("Medium"),
+    HIGH("High"),
+    VERY_HIGH("Very high");
+    private final String value;
 }

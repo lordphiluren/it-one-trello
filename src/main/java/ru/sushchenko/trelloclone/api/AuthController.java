@@ -1,6 +1,5 @@
 package ru.sushchenko.trelloclone.api;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,9 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.sushchenko.trelloclone.dto.AuthRequest;
-import ru.sushchenko.trelloclone.dto.AuthResponse;
-import ru.sushchenko.trelloclone.dto.ResponseMessage;
+import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
+import ru.sushchenko.trelloclone.dto.auth.AuthResponse;
 import ru.sushchenko.trelloclone.service.AuthService;
 import ru.sushchenko.trelloclone.utils.validation.LoginRequest;
 

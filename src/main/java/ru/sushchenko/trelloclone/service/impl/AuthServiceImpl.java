@@ -10,8 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sushchenko.trelloclone.dto.AuthRequest;
-import ru.sushchenko.trelloclone.dto.AuthResponse;
+import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
+import ru.sushchenko.trelloclone.dto.auth.AuthResponse;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.entity.enums.Role;
 import ru.sushchenko.trelloclone.repo.UserRepo;
@@ -47,7 +47,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void signUp(AuthRequest authRequest) {
         User user = userMapper.toEntity(authRequest);
-        user.setRole(Role.USER);
+        user.setRole(Role.ROLE_USER);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         try {
             User savedUser = userRepo.save(user);

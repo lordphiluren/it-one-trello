@@ -5,6 +5,7 @@ import lombok.*;
 import ru.sushchenko.trelloclone.entity.enums.Role;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,9 +16,9 @@ import java.util.Set;
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Long id;
+    private UUID id;
     @Column(name = "username", unique = true, nullable = false)
     private String username;
     @Column(name = "password", nullable = false)

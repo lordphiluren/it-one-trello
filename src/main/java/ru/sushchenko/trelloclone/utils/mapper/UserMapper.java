@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.sushchenko.trelloclone.dto.AuthRequest;
-import ru.sushchenko.trelloclone.dto.UserRequest;
-import ru.sushchenko.trelloclone.dto.UserResponse;
+import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
+import ru.sushchenko.trelloclone.dto.user.UserRequest;
+import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
 
 @Component

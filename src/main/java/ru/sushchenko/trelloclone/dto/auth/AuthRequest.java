@@ -1,4 +1,4 @@
-package ru.sushchenko.trelloclone.dto;
+package ru.sushchenko.trelloclone.dto.auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonView;

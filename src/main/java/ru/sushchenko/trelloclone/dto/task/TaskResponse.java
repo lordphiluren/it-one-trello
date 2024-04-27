@@ -1,18 +1,17 @@
-package ru.sushchenko.trelloclone.dto;
+package ru.sushchenko.trelloclone.dto.task;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
-import ru.sushchenko.trelloclone.entity.Tag;
-import ru.sushchenko.trelloclone.entity.Task;
+import ru.sushchenko.trelloclone.dto.user.UserResponse;
+import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.entity.enums.Priority;
 import ru.sushchenko.trelloclone.entity.enums.Status;
-import ru.sushchenko.trelloclone.entity.id.TaskAttachmentKey;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -22,7 +21,7 @@ import java.util.Set;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TaskResponse {
-    private Long id;
+    private UUID id;
     private String name;
     private String description;
     private Priority priority;

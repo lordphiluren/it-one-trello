@@ -1,5 +1,14 @@
 package ru.sushchenko.trelloclone.entity.enums;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum Status {
-    TODO, DOING, DONE, ON_REVIEW
+    TODO("To do"),
+    DOING("Doing"),
+    DONE("Done"),
+    ON_REVIEW("On review");
+    private final String value;
 }

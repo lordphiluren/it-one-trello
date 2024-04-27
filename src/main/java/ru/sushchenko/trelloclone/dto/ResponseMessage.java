@@ -1,21 +1,17 @@
-package ru.sushchenko.trelloclone.dto.auth;
+package ru.sushchenko.trelloclone.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import ru.sushchenko.trelloclone.dto.user.UserResponse;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class AuthResponse {
-    private String token;
-    private UserResponse user;
+public class ResponseMessage {
+    private String message;
 }

@@ -1,4 +1,4 @@
-package ru.sushchenko.trelloclone.dto;
+package ru.sushchenko.trelloclone.dto.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;

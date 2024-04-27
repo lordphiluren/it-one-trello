@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,7 +18,7 @@ import java.util.Objects;
 @Embeddable
 public class TaskAttachmentKey implements Serializable {
     @Column(name = "task_id")
-    private Long taskId;
+    private UUID taskId;
     @Column(name = "url")
     private String url;
 

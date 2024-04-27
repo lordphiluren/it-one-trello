@@ -1,9 +1,11 @@
 package ru.sushchenko.trelloclone.api;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,6 +16,8 @@ import ru.sushchenko.trelloclone.utils.exception.RestException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

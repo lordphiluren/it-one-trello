@@ -5,6 +5,7 @@ import lombok.*;
 
 import java.util.Date;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,9 +16,9 @@ import java.util.Set;
 @Table(name = "comment")
 public class Comment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
-    private Long id;
+    private UUID id;
     @Column(name = "message", nullable = false)
     private String message;
     @Column(name = "created_at", nullable = false)

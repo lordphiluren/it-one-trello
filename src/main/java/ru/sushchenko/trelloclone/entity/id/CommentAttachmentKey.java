@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,7 +17,7 @@ import java.util.Objects;
 @Embeddable
 public class CommentAttachmentKey implements Serializable {
     @Column(name = "comment_id")
-    private Long commentId;
+    private UUID commentId;
     @Column(name = "url")
     private String url;
 

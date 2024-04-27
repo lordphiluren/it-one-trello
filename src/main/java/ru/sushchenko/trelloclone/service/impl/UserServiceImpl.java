@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.sushchenko.trelloclone.dto.UserRequest;
-import ru.sushchenko.trelloclone.dto.UserResponse;
+import ru.sushchenko.trelloclone.dto.user.UserRequest;
+import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.repo.UserRepo;
 import ru.sushchenko.trelloclone.service.UserService;
@@ -16,6 +16,8 @@ import ru.sushchenko.trelloclone.utils.exception.UserNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
 import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -25,12 +27,12 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     @Override
     @Transactional
-    public UserResponse getUserById(Long id) {
+    public UserResponse getUserById(UUID id) {
         return userMapper.toDto(getExistingUser(id));
     }
     @Override
     @Transactional
-    public UserResponse updateUserById(Long id, UserRequest userDto, User currentUser) {
+    public UserResponse updateUserById(UUID id, UserRequest userDto, User currentUser) {
         User user = getExistingUser(id);
         if(checkIfAllowedToModifyUser(user, currentUser)) {
             try {
@@ -48,7 +50,19 @@ public class UserServiceImpl implements UserService {
                     " can't modify user with id: " + id);
         }
     }
-    private User getExistingUser(Long id) {
+
+    @Override
+    @Transactional
+    public Set<User> getUsersByIdIn(Set<UUID> ids) {
+        Set<User> users = userRepo.findByIdIn(ids);
+        if(users.isEmpty()) {
+            throw new UserNotFoundException(ids);
+        } else {
+            return users;
+        }
+    }
+
+    private User getExistingUser(UUID id) {
         return userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
