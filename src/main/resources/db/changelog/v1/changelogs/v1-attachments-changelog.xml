@@ -13,7 +13,7 @@
         </preConditions>
 
         <createTable tableName='task_attachment'>
-            <column name="task_id" type="bigint" />
+            <column name="task_id" type="uuid" />
             <column name="url" type="varchar" />
         </createTable>
         <addForeignKeyConstraint baseTableName="task_attachment" baseColumnNames="task_id" constraintName="fk_task_attachment"
@@ -24,7 +24,7 @@
         <addPrimaryKey tableName="task_attachment" columnNames="task_id, url" constraintName="pk_task_attachment" />
 
         <createTable tableName='comment_attachment'>
-            <column name="comment_id" type="bigint" />
+            <column name="comment_id" type="uuid" />
             <column name="url" type="varchar" />
         </createTable>
         <addForeignKeyConstraint baseTableName="comment_attachment" baseColumnNames="comment_id" constraintName="fk_comment_attachment"

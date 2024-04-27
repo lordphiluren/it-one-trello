@@ -12,8 +12,8 @@
         </preConditions>
 
         <createTable tableName='users'>
-            <column name="id" type="bigint" autoIncrement="true" generationType="BY DEFAULT">
-                <constraints primaryKey="true" nullable="false"/>
+            <column name="id" type="uuid" generationType="BY DEFAULT">
+                <constraints primaryKey="true"/>
             </column>
             <column name="username" type="varchar(32)">
                 <constraints nullable="false" unique="true" />

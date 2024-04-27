@@ -15,7 +15,7 @@
         </preConditions>
 
         <createTable tableName='task'>
-            <column name="id" type="bigint" autoIncrement="true" generationType="BY DEFAULT">
+            <column name="id" type="uuid" generationType="BY DEFAULT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(32)">
@@ -34,7 +34,7 @@
             <column name="end_date" type="date" />
             <column name="closed_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
-            <column name="creator_id" type="bigint" >
+            <column name="creator_id" type="uuid" >
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -45,8 +45,8 @@
                                  onUpdate="CASCADE"/>
 
         <createTable tableName="executor_task">
-            <column name="executor_id" type="bigint"/>
-            <column name="task_id" type="bigint"/>
+            <column name="executor_id" type="uuid"/>
+            <column name="task_id" type="uuid"/>
         </createTable>
         <addPrimaryKey tableName="executor_task" columnNames="executor_id, task_id"/>
         <addForeignKeyConstraint baseTableName="executor_task" baseColumnNames="executor_id" constraintName="fk_executor_task"

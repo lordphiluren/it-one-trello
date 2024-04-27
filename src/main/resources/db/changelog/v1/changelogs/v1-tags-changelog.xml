@@ -12,7 +12,7 @@
         </preConditions>
 
         <createTable tableName="task_tag">
-            <column name="task_id" type="bigint" />
+            <column name="task_id" type="uuid" />
             <column name="tag" type="varchar" />
         </createTable>
         <addPrimaryKey tableName="task_tag" columnNames="task_id, tag" constraintName="pk_task_tag"/>

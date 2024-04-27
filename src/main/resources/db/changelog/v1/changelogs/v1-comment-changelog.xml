@@ -12,15 +12,15 @@
         </preConditions>
 
         <createTable tableName='comment'>
-            <column name="id" type="bigint" autoIncrement="true" generationType="BY DEFAULT">
+            <column name="id" type="uuid" generationType="BY DEFAULT">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="message" type="varchar">
                 <constraints nullable="false" />
             </column>
             <column name="created_at" type="timestamp" />
-            <column name="creator_id" type="bigint" />
-            <column name="task_id" type="bigint" />
+            <column name="creator_id" type="uuid" />
+            <column name="task_id" type="uuid" />
         </createTable>
         <addForeignKeyConstraint baseTableName="comment" baseColumnNames="creator_id" constraintName="fk_users_comment"
                                  referencedTableName="users"
