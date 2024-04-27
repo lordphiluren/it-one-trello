@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -14,7 +15,7 @@ import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.TaskService;
 
-import java.util.List;
+import java.util.*;
 import java.util.UUID;
 
 @RestController
@@ -25,9 +26,9 @@ public class TaskController {
     private final TaskService taskService;
     @Operation(summary = "Get all tasks with dynamic filter")
     @SecurityRequirement(name = "JWT")
-    @GetMapping("")
-    public ResponseEntity<List<TaskResponse>> getAllTasks() {
-        return ResponseEntity.ok(taskService.getAllTasks());
+    @PostMapping("/filters")
+    public ResponseEntity<List<TaskResponse>> getAllTasks(@RequestBody(required = false) TaskFilterRequest taskFilter) {
+        return ResponseEntity.ok(taskService.getAllTasks(taskFilter));
     }
     @Operation(summary = "Get task by id")
     @SecurityRequirement(name = "JWT")

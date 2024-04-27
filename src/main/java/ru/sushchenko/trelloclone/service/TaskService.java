@@ -1,6 +1,7 @@
 package ru.sushchenko.trelloclone.service;
 
 import org.springframework.data.domain.Pageable;
+import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.entity.User;
@@ -13,8 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface TaskService {
-//    Pageable pageable, Set<String> tags, Priority priority, Status status, Date endDate
-    List<TaskResponse> getAllTasks();
+    List<TaskResponse> getAllTasks(TaskFilterRequest taskFilterRequest);
     TaskResponse getTaskById(UUID id);
     TaskResponse addTask(TaskRequest taskRequest, User creator);
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);

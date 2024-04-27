@@ -2,8 +2,13 @@ package ru.sushchenko.trelloclone.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.entity.Tag;
@@ -12,6 +17,8 @@ import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.entity.enums.Status;
 import ru.sushchenko.trelloclone.entity.id.TaskTagKey;
 import ru.sushchenko.trelloclone.repo.TaskRepo;
+import ru.sushchenko.trelloclone.repo.spec.TaskSpecification;
+import ru.sushchenko.trelloclone.service.TagService;
 import ru.sushchenko.trelloclone.service.TaskService;
 import ru.sushchenko.trelloclone.service.UserService;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
@@ -28,14 +35,22 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepo taskRepo;
     private final TaskMapper taskMapper;
     private final UserService userService;
+    private final TagService tagService;
     @Override
     @Transactional
-    public List<TaskResponse> getAllTasks() {
-        return taskRepo.findAll().stream()
+    public List<TaskResponse> getAllTasks(TaskFilterRequest taskFilter) {
+        List<Task> task;
+        if(taskFilter != null) {
+            Specification<Task> spec = getSpecificationFromFilter(taskFilter);
+            Pageable pageable = getPageableFromFilter(taskFilter);
+            task = taskRepo.findAll(spec, pageable).getContent();
+        } else {
+            task = taskRepo.findAll();
+        }
+        return task.stream()
                 .map(taskMapper::toDto)
                 .collect(Collectors.toList());
     }
-
     @Override
     @Transactional
     public TaskResponse getTaskById(UUID id) {
@@ -47,8 +62,8 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse addTask(TaskRequest taskDto, User creator) {
         Task task = createTaskFromDto(taskDto);
         task.setCreator(creator);
-        task.setTags(createTagsFromDto(taskDto, task));
         task.setExecutors(createExecutorsFromDto(taskDto));
+        task.setTags(createTagsFromDto(taskDto, task));
         Task savedTask = taskRepo.save(task);
         log.info("Task with id: {} created", savedTask.getId());
         return taskMapper.toDto(savedTask);
@@ -60,14 +75,10 @@ public class TaskServiceImpl implements TaskService {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
             taskMapper.mergeDtoIntoEntity(taskDto, task);
-            if(task.getStatus() == Status.DONE) {
-                task.setClosedAt(new Date());
-            } else {
-                task.setClosedAt(null);
-            }
             task.setUpdatedAt(new Date());
+            task.setClosedAt(updateClosedAt(task));
             task.setExecutors(createExecutorsFromDto(taskDto));
-            task.setTags(createTagsFromDto(taskDto, task));
+            task.setTags(updateTagsFromDto(taskDto, task));
             Task savedTask = taskRepo.saveAndFlush(task);
             log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
             return taskMapper.toDto(savedTask);
@@ -91,8 +102,23 @@ public class TaskServiceImpl implements TaskService {
                     " can't delete task with id: " + id);
         }
     }
+
     private Task getExistingTask(UUID id) {
         return taskRepo.findById(id).orElseThrow(() -> new TaskNotFoundException(id));
+    }
+    private Pageable getPageableFromFilter(TaskFilterRequest taskFilter) {
+        int index = taskFilter.getPageIndex() != null ? taskFilter.getPageIndex() : 0;
+        int size = taskFilter.getPageSize() != null ? taskFilter.getPageSize() : Integer.MAX_VALUE;
+        String sort = taskFilter.getSort() != null ? taskFilter.getSort().getValue() : null;
+        if(sort != null) {
+            return PageRequest.of(index, size, Sort.by(sort));
+        } else {
+            return PageRequest.of(index, size);
+        }
+    }
+    private Specification<Task> getSpecificationFromFilter(TaskFilterRequest taskFilter) {
+        return TaskSpecification.filterTasks(taskFilter.getPriority(), taskFilter.getStatus(),
+                taskFilter.getTags(), taskFilter.getCreatorId(), taskFilter.getEndDate());
     }
     private Set<Tag> createTagsFromDto(TaskRequest taskDto, Task task) {
         return taskDto.getTags().stream()
@@ -105,9 +131,23 @@ public class TaskServiceImpl implements TaskService {
                 })
                 .collect(Collectors.toSet());
     }
+
+    private Set<Tag> updateTagsFromDto(TaskRequest taskDto, Task task) {
+        return tagService.updateTaskTags(createTagsFromDto(taskDto, task), task);
+    }
+
+    private Date updateClosedAt(Task task) {
+        if(task.getStatus() == Status.DONE) {
+            return new Date();
+        } else {
+            return null;
+        }
+    }
+
     private Set<User> createExecutorsFromDto(TaskRequest taskDto) {
         return userService.getUsersByIdIn(taskDto.getExecutorIds());
     }
+
     private void enrichTask(Task task) {
         task.setCreatedAt(new Date());
         task.setExecutors(new HashSet<>());
@@ -115,17 +155,21 @@ public class TaskServiceImpl implements TaskService {
         task.setAttachments(new HashSet<>());
         task.setTags(new HashSet<>());
     }
+
     private Task createTaskFromDto(TaskRequest taskDto) {
         Task task = taskMapper.toEntity(taskDto);
         enrichTask(task);
         return task;
     }
+
     private boolean checkIfAllowedToModifyTask(Task task, User currentUser) {
         return checkIfCreator(task, currentUser) || checkIfExecutor(task, currentUser);
     }
+
     private boolean checkIfCreator(Task task, User currentUser) {
         return Objects.equals(task.getCreator().getId(), currentUser.getId());
     }
+
     private boolean checkIfExecutor(Task task, User currentUser) {
          return task.getExecutors().stream()
                  .map(User::getId)
