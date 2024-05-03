@@ -9,4 +9,6 @@
     <include file="changelogs/v1-tags-changelog.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/v1-comment-changelog.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/v1-attachments-changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1-checklist-changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1-checkitem-changelog.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

@@ -37,6 +37,10 @@
             <column name="creator_id" type="uuid" >
                 <constraints nullable="false"/>
             </column>
+            <column name="comments_count" type="bigint" defaultValue="0"/>
+            <column name="attachments_count" type="bigint" defaultValue="0"/>
+            <column name="checkitems_count" type="bigint" defaultValue="0"/>
+            <column name="checkitems_checked_count" type="bigint" defaultValue="0"/>
         </createTable>
         <addForeignKeyConstraint baseTableName="task" baseColumnNames="creator_id" constraintName="fk_task_users"
                                  referencedTableName="users"

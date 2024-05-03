@@ -33,5 +33,6 @@
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"/>
         <addPrimaryKey tableName="comment_attachment" columnNames="comment_id, url" constraintName="pk_comment_attachment" />
+        <sqlFile path="db/changelog/v1/triggers/count_attachments.sql" dbms="postgresql, oracle" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>

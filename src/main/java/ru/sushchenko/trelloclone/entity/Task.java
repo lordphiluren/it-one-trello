@@ -16,6 +16,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "task")
+@NamedEntityGraph(
+        name = "task-all-relations",
+        includeAllAttributes = true
+)
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -43,6 +47,14 @@ public class Task {
     @Column(name = "closed_at")
     @Temporal(TemporalType.TIMESTAMP)
     private Date closedAt;
+    @Column(name = "comments_count")
+    private Long commentsCount;
+    @Column(name = "attachments_count")
+    private Long attachmentsCount;
+    @Column(name = "checkitems_count")
+    private Long checkItemsCount;
+    @Column(name = "checkitems_checked_count")
+    private Long checkItemsCheckedCount;
 
     // Relations
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,6 +67,8 @@ public class Task {
             inverseJoinColumns = {@JoinColumn(name = "executor_id")}
     )
     private Set<User> executors;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "task", cascade = CascadeType.ALL)
+    private Set<Checklist> checklists;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "task", cascade = CascadeType.ALL)
     private Set<Comment> comments;
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "task", cascade = CascadeType.ALL)

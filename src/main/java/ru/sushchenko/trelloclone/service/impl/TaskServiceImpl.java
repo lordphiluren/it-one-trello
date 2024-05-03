@@ -108,7 +108,7 @@ public class TaskServiceImpl implements TaskService {
     }
     private Pageable getPageableFromFilter(TaskFilterRequest taskFilter) {
         int index = taskFilter.getPageIndex() != null ? taskFilter.getPageIndex() : 0;
-        int size = taskFilter.getPageSize() != null ? taskFilter.getPageSize() : Integer.MAX_VALUE;
+        int size = taskFilter.getPageSize() != null ? taskFilter.getPageSize() : 50;
         String sort = taskFilter.getSort() != null ? taskFilter.getSort().getValue() : null;
         if(sort != null) {
             return PageRequest.of(index, size, Sort.by(sort));
