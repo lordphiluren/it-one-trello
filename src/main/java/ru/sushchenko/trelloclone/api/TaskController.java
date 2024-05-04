@@ -75,4 +75,10 @@ public class TaskController {
         return new ResponseEntity<>(taskService.addCommentToTaskById(id, commentDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
+    @Operation(summary = "Get comments by task id")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("/{id}/comments")
+    public ResponseEntity<List<CommentResponse>> getCommentsByTaskId(@PathVariable UUID id) {
+        return ResponseEntity.ok(taskService.getCommentsByTaskId(id));
+    }
 }

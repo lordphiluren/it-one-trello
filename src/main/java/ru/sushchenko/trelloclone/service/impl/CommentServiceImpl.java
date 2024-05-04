@@ -15,6 +15,9 @@ import ru.sushchenko.trelloclone.utils.mapper.CommentMapper;
 
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,6 +36,14 @@ public class CommentServiceImpl implements CommentService {
         log.info("Comment with id: {} created", savedComment.getId());
         return commentMapper.toDto(savedComment);
     }
+
+    @Override
+    public List<CommentResponse> getCommentsByTaskId(UUID taskId) {
+        return commentRepo.findByTaskId(taskId).stream()
+                .map(commentMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     private void enrichComment(Comment comment) {
         comment.setAttachments(new HashSet<>());
         comment.setCreatedAt(new Date());

@@ -22,5 +22,6 @@ public interface TaskService {
     TaskResponse addTask(TaskRequest taskRequest, User creator);
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);
     CommentResponse addCommentToTaskById(UUID id, CommentRequest commentRequest, User currentUser);
+    List<CommentResponse> getCommentsByTaskId(UUID id);
     void deleteTaskById(UUID id, User creator);
 }

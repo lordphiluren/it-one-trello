@@ -105,6 +105,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<CommentResponse> getCommentsByTaskId(UUID id) {
+        return commentService.getCommentsByTaskId(id);
+    }
+
+    @Override
     @Transactional
     public void deleteTaskById(UUID id, User currentUser) {
         Task task = getExistingTask(id);

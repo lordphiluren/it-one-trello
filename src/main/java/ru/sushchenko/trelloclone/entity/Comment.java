@@ -14,6 +14,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "comment")
+@NamedEntityGraph(
+        name = "comment-entity-graph",
+        attributeNodes = {
+                @NamedAttributeNode("creator"),
+                @NamedAttributeNode("attachments")
+        }
+)
 public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
