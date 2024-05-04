@@ -8,11 +8,13 @@
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName='task_attachment'/>
-                <tableExists tableName='comment_attachment'/>
             </not>
         </preConditions>
 
         <createTable tableName='task_attachment'>
+            <column name="id" type="uuid" generationType="BY DEFAULT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="task_id" type="uuid" />
             <column name="url" type="varchar" />
         </createTable>
@@ -21,18 +23,7 @@
                                  referencedColumnNames="id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"/>
-        <addPrimaryKey tableName="task_attachment" columnNames="task_id, url" constraintName="pk_task_attachment" />
-
-        <createTable tableName='comment_attachment'>
-            <column name="comment_id" type="uuid" />
-            <column name="url" type="varchar" />
-        </createTable>
-        <addForeignKeyConstraint baseTableName="comment_attachment" baseColumnNames="comment_id" constraintName="fk_comment_attachment"
-                                 referencedTableName="comment"
-                                 referencedColumnNames="id"
-                                 onDelete="CASCADE"
-                                 onUpdate="CASCADE"/>
-        <addPrimaryKey tableName="comment_attachment" columnNames="comment_id, url" constraintName="pk_comment_attachment" />
+        <addUniqueConstraint tableName="task_attachment" columnNames="task_id, url"/>
         <sqlFile path="db/changelog/v1/triggers/count_attachments.sql" dbms="postgresql, oracle" splitStatements="false" />
     </changeSet>
 </databaseChangeLog>

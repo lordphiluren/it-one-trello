@@ -4,6 +4,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.web.multipart.MultipartFile;
+import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
@@ -80,5 +83,18 @@ public class TaskController {
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<CommentResponse>> getCommentsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getCommentsByTaskId(id));
+    }
+    @Operation(summary = "Add attachments to task by id")
+    @SecurityRequirement(name = "JWT")
+    @RequestMapping(value = "/{id}/attachments",
+            method = RequestMethod.POST,
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<List<AttachmentResponse>> addAttachmentsToTaskById(@PathVariable UUID id,
+                                                                             @RequestPart List<MultipartFile> attachments,
+                                                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.addAttachmentsToTaskById(id, attachments, userPrincipal.getUser()),
+                HttpStatus.CREATED);
     }
 }

@@ -19,11 +19,7 @@ public class CommentMapper {
     private final UserMapper userMapper;
     public CommentResponse toDto(Comment comment) {
         UserResponse userDto = userMapper.toDto(comment.getCreator());
-        Set<String> attachmentsDto = comment.getAttachments().stream()
-                .map(attach -> attach.getId().getUrl())
-                .collect(Collectors.toSet());
         CommentResponse commentDto = modelMapper.map(comment, CommentResponse.class);
-        commentDto.setAttachments(attachmentsDto);
         commentDto.setCreator(userDto);
         return commentDto;
     }

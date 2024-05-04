@@ -30,7 +30,7 @@ import java.util.ArrayList;
 )
 @Configuration
 public class SwaggerConfig {
-
+    // allows sending multipart/form-data from documentation
     public SwaggerConfig(MappingJackson2HttpMessageConverter converter) {
         var supportedMediaTypes = new ArrayList<>(converter.getSupportedMediaTypes());
         supportedMediaTypes.add(new MediaType("application", "octet-stream"));

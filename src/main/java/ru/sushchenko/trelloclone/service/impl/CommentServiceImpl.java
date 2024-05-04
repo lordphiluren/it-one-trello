@@ -14,7 +14,6 @@ import ru.sushchenko.trelloclone.service.CommentService;
 import ru.sushchenko.trelloclone.utils.mapper.CommentMapper;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,7 +44,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private void enrichComment(Comment comment) {
-        comment.setAttachments(new HashSet<>());
         comment.setCreatedAt(new Date());
     }
 }

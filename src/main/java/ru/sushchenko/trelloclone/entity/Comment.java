@@ -17,8 +17,7 @@ import java.util.UUID;
 @NamedEntityGraph(
         name = "comment-entity-graph",
         attributeNodes = {
-                @NamedAttributeNode("creator"),
-                @NamedAttributeNode("attachments")
+                @NamedAttributeNode("creator")
         }
 )
 public class Comment {
@@ -33,8 +32,6 @@ public class Comment {
     private Date createdAt;
 
     // Relations
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "comment")
-    private Set<CommentAttachment> attachments;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
     private User creator;

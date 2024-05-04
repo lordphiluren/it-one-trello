@@ -1,11 +1,9 @@
 spring:
-  config:
-    import: optional:file:app.env[.properties]
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_URL}/${DB_NAME}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5432/trello_db
+    username: postgres
+    password: qwerty
   jpa:
     hibernate:
       ddl-auto: validate
@@ -21,4 +19,6 @@ spring:
       max-request-size: 25MB
 security:
   jwt:
-    secret-key: ${JWT_SECRET}
+    secret-key: veryLongAndVerySecretKeyNoBodyWillEverGuessItBecauseItIsUnbelievablySecretOhMyLordSomeOneTryToGuessIt
+upload-server:
+  url: http://localhost:8081
