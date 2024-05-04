@@ -8,6 +8,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
+import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
@@ -18,6 +20,7 @@ import ru.sushchenko.trelloclone.entity.enums.Status;
 import ru.sushchenko.trelloclone.entity.id.TaskTagKey;
 import ru.sushchenko.trelloclone.repo.TaskRepo;
 import ru.sushchenko.trelloclone.repo.spec.TaskSpecification;
+import ru.sushchenko.trelloclone.service.CommentService;
 import ru.sushchenko.trelloclone.service.TagService;
 import ru.sushchenko.trelloclone.service.TaskService;
 import ru.sushchenko.trelloclone.service.UserService;
@@ -36,6 +39,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskMapper taskMapper;
     private final UserService userService;
     private final TagService tagService;
+    private final CommentService commentService;
     @Override
     public List<TaskResponse> getAllTasks(TaskFilterRequest taskFilter) {
         List<Task> task;
@@ -89,6 +93,19 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    public CommentResponse addCommentToTaskById(UUID id, CommentRequest commentDto, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfAllowedToModifyTask(task, currentUser)) {
+            return commentService.addComment(commentDto, task, currentUser);
+        } else {
+            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't write comments in task with id: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
     public void deleteTaskById(UUID id, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfCreator(task, currentUser)) {
@@ -135,11 +152,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Date updateClosedAt(Task task) {
-        if(task.getStatus() == Status.DONE) {
-            return new Date();
-        } else {
-            return null;
-        }
+        return task.getStatus() == Status.DONE ? new Date() : null;
     }
 
     private Set<User> createExecutorsFromDto(TaskRequest taskDto) {

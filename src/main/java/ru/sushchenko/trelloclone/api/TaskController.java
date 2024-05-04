@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
+import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.sushchenko.trelloclone.dto.ResponseMessage;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
+import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.TaskService;
 
@@ -61,5 +64,15 @@ public class TaskController {
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.deleteTaskById(id, userPrincipal.getUser());
         return ResponseEntity.ok(ResponseMessage.builder().message("Task successfully deleted").build());
+    }
+    @Operation(summary = "Add comment to task by id")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{id}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<CommentResponse> addCommentToTaskById(@PathVariable UUID id,
+                                                                @RequestBody CommentRequest commentDto,
+                                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.addCommentToTaskById(id, commentDto, userPrincipal.getUser()),
+                HttpStatus.CREATED);
     }
 }
