@@ -1,6 +1,7 @@
 package ru.sushchenko.trelloclone.repo.spec;
 
 import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import ru.sushchenko.trelloclone.entity.Task;
@@ -35,7 +36,7 @@ public class TaskSpecification {
 
     private static Specification<Task> tagsIn(Set<String> tags) {
         return (((root, query, criteriaBuilder) -> {
-            Expression<String> taskTags = root.join("tags").get("id").get("tag");
+            Expression<String> taskTags = root.join("tags", JoinType.LEFT).get("id").get("tag");
             Predicate tagsPredicate = taskTags.in(tags);
             return criteriaBuilder.and(tagsPredicate);
         }));

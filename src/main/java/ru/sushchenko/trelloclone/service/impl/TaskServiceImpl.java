@@ -37,7 +37,6 @@ public class TaskServiceImpl implements TaskService {
     private final UserService userService;
     private final TagService tagService;
     @Override
-    @Transactional
     public List<TaskResponse> getAllTasks(TaskFilterRequest taskFilter) {
         List<Task> task;
         if(taskFilter != null) {
@@ -52,7 +51,6 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toList());
     }
     @Override
-    @Transactional
     public TaskResponse getTaskById(UUID id) {
         return taskMapper.toDto(getExistingTask(id));
     }
@@ -154,6 +152,11 @@ public class TaskServiceImpl implements TaskService {
         task.setComments(new HashSet<>());
         task.setAttachments(new HashSet<>());
         task.setTags(new HashSet<>());
+        task.setChecklists(new HashSet<>());
+        task.setCommentsCount(0L);
+        task.setAttachmentsCount(0L);
+        task.setCheckItemsCount(0L);
+        task.setCheckItemsCheckedCount(0L);
     }
 
     private Task createTaskFromDto(TaskRequest taskDto) {

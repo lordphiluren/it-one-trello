@@ -28,9 +28,11 @@ public class TaskResponse {
     private Status status;
     private UserResponse creator;
     private Set<UserResponse> executors;
-    private Set<CommentResponse> comments;
-    private Set<String> attachments;
     private Set<String> tags;
+    private Long commentsCount;
+    private Long attachmentsCount;
+    private Long checkItemsCount;
+    private Long checkItemsCheckedCount;
     private Date endDate;
     private Date createdAt;
     private Date updatedAt;

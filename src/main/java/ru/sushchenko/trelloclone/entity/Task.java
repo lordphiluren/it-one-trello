@@ -17,8 +17,12 @@ import java.util.UUID;
 @Entity
 @Table(name = "task")
 @NamedEntityGraph(
-        name = "task-all-relations",
-        includeAllAttributes = true
+        name = "task-entity-graph",
+        attributeNodes = {
+                @NamedAttributeNode("creator"),
+                @NamedAttributeNode("executors"),
+                @NamedAttributeNode("tags")
+        }
 )
 public class Task {
     @Id

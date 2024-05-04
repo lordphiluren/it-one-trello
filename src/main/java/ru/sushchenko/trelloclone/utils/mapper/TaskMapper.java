@@ -20,17 +20,10 @@ import java.util.stream.Collectors;
 public class TaskMapper {
     private final ModelMapper modelMapper;
     private final UserMapper userMapper;
-    private final CommentMapper commentMapper;
     public TaskResponse toDto(Task task) {
         UserResponse creatorDto = userMapper.toDto(task.getCreator());
         Set<UserResponse> executorsDto = task.getExecutors().stream()
                 .map(userMapper::toDto)
-                .collect(Collectors.toSet());
-        Set<CommentResponse> commentsDto = task.getComments().stream()
-                .map(commentMapper::toDto)
-                .collect(Collectors.toSet());
-        Set<String> attachmentsDto = task.getAttachments().stream()
-                .map(a -> a.getId().getUrl())
                 .collect(Collectors.toSet());
         Set<String> tagsDto = task.getTags().stream()
                 .map(t -> t.getId().getTag())
@@ -39,8 +32,6 @@ public class TaskMapper {
         TaskResponse taskDto = modelMapper.map(task, TaskResponse.class);
         taskDto.setCreator(creatorDto);
         taskDto.setExecutors(executorsDto);
-        taskDto.setComments(commentsDto);
-        taskDto.setAttachments(attachmentsDto);
         taskDto.setTags(tagsDto);
 
         return taskDto;
