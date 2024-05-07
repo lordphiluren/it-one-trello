@@ -123,6 +123,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<AttachmentResponse> getAttachmentsByTaskId(UUID id) {
+        return attachService.getAttachmentsByTaskId(id);
+    }
+
+    @Override
     @Transactional
     public void deleteTaskById(UUID id, User currentUser) {
         Task task = getExistingTask(id);

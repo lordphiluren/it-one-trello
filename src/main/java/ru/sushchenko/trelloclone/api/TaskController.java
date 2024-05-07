@@ -3,6 +3,7 @@ package ru.sushchenko.trelloclone.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,7 +34,7 @@ public class TaskController {
     @Operation(summary = "Get all tasks with dynamic filter")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/filters")
-    public ResponseEntity<List<TaskResponse>> getAllTasks(@RequestBody(required = false) TaskFilterRequest taskFilter) {
+    public ResponseEntity<List<TaskResponse>> getAllTasks(@Valid @RequestBody(required = false) TaskFilterRequest taskFilter) {
         return ResponseEntity.ok(taskService.getAllTasks(taskFilter));
     }
     @Operation(summary = "Get task by id")
@@ -46,7 +47,7 @@ public class TaskController {
     @SecurityRequirement(name = "JWT")
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<TaskResponse> addTask(@RequestBody TaskRequest taskDto,
+    public ResponseEntity<TaskResponse> addTask(@Valid @RequestBody TaskRequest taskDto,
                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addTask(taskDto, userPrincipal.getUser()), HttpStatus.CREATED);
     }
@@ -55,7 +56,7 @@ public class TaskController {
     @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<TaskResponse> updateTaskById(@PathVariable UUID id,
-                                                       @RequestBody TaskRequest taskDto,
+                                                       @Valid @RequestBody TaskRequest taskDto,
                                                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(taskService.updateTaskById(id, taskDto, userPrincipal.getUser()));
     }
@@ -73,7 +74,7 @@ public class TaskController {
     @PostMapping("/{id}/comments")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<CommentResponse> addCommentToTaskById(@PathVariable UUID id,
-                                                                @RequestBody CommentRequest commentDto,
+                                                                @Valid @RequestBody CommentRequest commentDto,
                                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addCommentToTaskById(id, commentDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
@@ -92,9 +93,15 @@ public class TaskController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<List<AttachmentResponse>> addAttachmentsToTaskById(@PathVariable UUID id,
-                                                                             @RequestPart List<MultipartFile> attachments,
+                                                                             @Valid @RequestPart List<MultipartFile> attachments,
                                                                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addAttachmentsToTaskById(id, attachments, userPrincipal.getUser()),
                 HttpStatus.CREATED);
+    }
+    @Operation(summary = "Get attachments by task id")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("/{id}/attachments")
+    public ResponseEntity<List<AttachmentResponse>> getAttachmentsByTaskId(@PathVariable UUID id) {
+        return ResponseEntity.ok(taskService.getAttachmentsByTaskId(id));
     }
 }

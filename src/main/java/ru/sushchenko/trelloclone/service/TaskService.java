@@ -30,5 +30,6 @@ public interface TaskService {
     CommentResponse addCommentToTaskById(UUID id, CommentRequest commentRequest, User currentUser);
     List<AttachmentResponse> addAttachmentsToTaskById(UUID id, List<MultipartFile> attachments, User currentUser);
     List<CommentResponse> getCommentsByTaskId(UUID id);
+    List<AttachmentResponse> getAttachmentsByTaskId(UUID id);
     void deleteTaskById(UUID id, User creator);
 }

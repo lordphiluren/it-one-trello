@@ -17,6 +17,7 @@ import ru.sushchenko.trelloclone.utils.mapper.AttachmentMapper;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,6 +37,14 @@ public class AttachmentServiceImpl implements AttachmentService {
                 .map(attachMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<AttachmentResponse> getAttachmentsByTaskId(UUID taskId) {
+        return attachRepo.findByTaskId(taskId).stream()
+                .map(attachMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     private Set<TaskAttachment> createAttachmentsFromUrls(Set<String> urls, Task task) {
         return urls.stream().map(url -> new TaskAttachment(null, url, task)).collect(Collectors.toSet());
     }
