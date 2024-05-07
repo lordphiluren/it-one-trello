@@ -34,11 +34,17 @@ import java.util.UUID;
 @Tag(name = "Tasks", description = "Task related actions")
 public class TaskController {
     private final TaskService taskService;
+    @Operation(summary = "Get all tasks")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("")
+    public ResponseEntity<List<TaskResponse>> getAllTasks() {
+        return ResponseEntity.ok(taskService.getAllTasks());
+    }
     @Operation(summary = "Get all tasks with dynamic filter")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/filters")
-    public ResponseEntity<List<TaskResponse>> getAllTasks(@Valid @RequestBody(required = false) TaskFilterRequest taskFilter) {
-        return ResponseEntity.ok(taskService.getAllTasks(taskFilter));
+    public ResponseEntity<List<TaskResponse>> getAllTasksWithFilters(@Valid @RequestBody(required = false) TaskFilterRequest taskFilter) {
+        return ResponseEntity.ok(taskService.getAllTasksWithFilters(taskFilter));
     }
     @Operation(summary = "Get task by id")
     @SecurityRequirement(name = "JWT")
@@ -116,5 +122,11 @@ public class TaskController {
                                                                     @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addChecklistToTaskById(id, checklistDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
+    }
+    @Operation(summary = "Get attachments by task id")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("/{id}/checklists")
+    public ResponseEntity<List<ChecklistResponse>> getChecklistsByTaskId(@PathVariable UUID id) {
+        return ResponseEntity.ok(taskService.getChecklistsByTaskId(id));
     }
 }

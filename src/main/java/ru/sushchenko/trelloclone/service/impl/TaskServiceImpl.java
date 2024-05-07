@@ -43,8 +43,16 @@ public class TaskServiceImpl implements TaskService {
     private final CommentService commentService;
     private final AttachmentService attachService;
     private final ChecklistService checklistService;
+
     @Override
-    public List<TaskResponse> getAllTasks(TaskFilterRequest taskFilter) {
+    public List<TaskResponse> getAllTasks() {
+        return taskRepo.findAll().stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> getAllTasksWithFilters(TaskFilterRequest taskFilter) {
         List<Task> task;
         if(taskFilter != null) {
             Specification<Task> spec = getSpecificationFromFilter(taskFilter);
@@ -121,6 +129,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistDto, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
@@ -140,6 +149,11 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<AttachmentResponse> getAttachmentsByTaskId(UUID id) {
         return attachService.getAttachmentsByTaskId(id);
+    }
+
+    @Override
+    public List<ChecklistResponse> getChecklistsByTaskId(UUID id) {
+        return checklistService.getChecklistsByTaskId(id);
     }
 
     @Override

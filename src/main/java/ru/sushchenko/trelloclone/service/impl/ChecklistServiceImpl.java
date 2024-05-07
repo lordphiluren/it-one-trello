@@ -6,14 +6,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
-import ru.sushchenko.trelloclone.entity.CheckItem;
 import ru.sushchenko.trelloclone.entity.Checklist;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.repo.ChecklistRepo;
 import ru.sushchenko.trelloclone.service.ChecklistService;
 import ru.sushchenko.trelloclone.utils.mapper.ChecklistMapper;
 
-import java.util.Set;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,5 +31,12 @@ public class ChecklistServiceImpl implements ChecklistService {
         Checklist savedChecklist = checklistRepo.save(checklist);
         log.info("Checklist with id: {} created for task with id: {}", savedChecklist.getId(), task.getId());
         return checklistMapper.toDto(savedChecklist);
+    }
+
+    @Override
+    public List<ChecklistResponse> getChecklistsByTaskId(UUID taskId) {
+        return checklistRepo.findByTaskId(taskId).stream()
+                .map(checklistMapper::toDto)
+                .collect(Collectors.toList());
     }
 }

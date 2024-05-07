@@ -25,7 +25,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface TaskService {
-    List<TaskResponse> getAllTasks(TaskFilterRequest taskFilterRequest);
+    List<TaskResponse> getAllTasks();
+    List<TaskResponse> getAllTasksWithFilters(TaskFilterRequest taskFilterRequest);
     TaskResponse getTaskById(UUID id);
     TaskResponse addTask(TaskRequest taskRequest, User creator);
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);
@@ -34,5 +35,6 @@ public interface TaskService {
     ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistRequest, User currentUser);
     List<CommentResponse> getCommentsByTaskId(UUID id);
     List<AttachmentResponse> getAttachmentsByTaskId(UUID id);
+    List<ChecklistResponse> getChecklistsByTaskId(UUID id);
     void deleteTaskById(UUID id, User creator);
 }
