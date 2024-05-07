@@ -13,6 +13,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @Entity
 @Table(name = "checklist")
+@NamedEntityGraph(
+        name = "checklist-entity-graph",
+        attributeNodes = {
+                @NamedAttributeNode("checkItems")
+        }
+)
 public class Checklist {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

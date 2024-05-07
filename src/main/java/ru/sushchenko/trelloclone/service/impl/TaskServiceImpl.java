@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
@@ -40,6 +42,7 @@ public class TaskServiceImpl implements TaskService {
     private final TagService tagService;
     private final CommentService commentService;
     private final AttachmentService attachService;
+    private final ChecklistService checklistService;
     @Override
     public List<TaskResponse> getAllTasks(TaskFilterRequest taskFilter) {
         List<Task> task;
@@ -110,6 +113,18 @@ public class TaskServiceImpl implements TaskService {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
             return attachService.addAttachmentsToTask(task, attachments);
+        } else {
+            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't write comments in task with id: " + id);
+        }
+    }
+
+    @Override
+    public ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistDto, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfAllowedToModifyTask(task, currentUser)) {
+            return checklistService.addChecklist(checklistDto, task);
         } else {
             log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +

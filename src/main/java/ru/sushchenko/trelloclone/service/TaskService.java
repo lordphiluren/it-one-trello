@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
@@ -29,6 +31,7 @@ public interface TaskService {
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);
     CommentResponse addCommentToTaskById(UUID id, CommentRequest commentRequest, User currentUser);
     List<AttachmentResponse> addAttachmentsToTaskById(UUID id, List<MultipartFile> attachments, User currentUser);
+    ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistRequest, User currentUser);
     List<CommentResponse> getCommentsByTaskId(UUID id);
     List<AttachmentResponse> getAttachmentsByTaskId(UUID id);
     void deleteTaskById(UUID id, User creator);

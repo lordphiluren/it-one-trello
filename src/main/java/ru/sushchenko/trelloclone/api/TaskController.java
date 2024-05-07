@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
+import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.sushchenko.trelloclone.dto.ResponseMessage;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
+import ru.sushchenko.trelloclone.entity.Checklist;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.TaskService;
@@ -103,5 +106,15 @@ public class TaskController {
     @GetMapping("/{id}/attachments")
     public ResponseEntity<List<AttachmentResponse>> getAttachmentsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getAttachmentsByTaskId(id));
+    }
+    @Operation(summary = "Add checklist to task by id")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{id}/checklists")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<ChecklistResponse> addChecklistToTaskById(@PathVariable UUID id,
+                                                                    @Valid @RequestBody ChecklistRequest checklistDto,
+                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.addChecklistToTaskById(id, checklistDto, userPrincipal.getUser()),
+                HttpStatus.CREATED);
     }
 }
