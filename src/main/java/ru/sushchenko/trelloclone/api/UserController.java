@@ -15,6 +15,7 @@ import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.UserService;
 import ru.sushchenko.trelloclone.utils.validation.UpdateValidation;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -23,6 +24,12 @@ import java.util.UUID;
 @Tag(name = "Users", description = "User account actions")
 public class UserController {
     private final UserService userService;
+    @Operation(summary = "Get all users")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("")
+    public ResponseEntity<List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}")

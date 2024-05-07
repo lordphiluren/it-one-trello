@@ -15,9 +15,11 @@ import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.UserNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,6 +27,14 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
+
+    @Override
+    public List<UserResponse> getAllUsers() {
+        return userRepo.findAll().stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     @Override
     @Transactional
     public UserResponse getUserById(UUID id) {
