@@ -72,7 +72,7 @@ public class TaskController {
     @Operation(summary = "Delete task by id if user is creator")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<ResponseMessage> deleteTaskById(@PathVariable UUID id,
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.deleteTaskById(id, userPrincipal.getUser());
@@ -102,8 +102,8 @@ public class TaskController {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<List<AttachmentResponse>> addAttachmentsToTaskById(@PathVariable UUID id,
-                                                                             @Valid @RequestPart List<MultipartFile> attachments,
-                                                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                                                                     @Valid @RequestPart List<MultipartFile> attachments,
+                                                                     @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addAttachmentsToTaskById(id, attachments, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
@@ -123,10 +123,30 @@ public class TaskController {
         return new ResponseEntity<>(taskService.addChecklistToTaskById(id, checklistDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
-    @Operation(summary = "Get attachments by task id")
+    @Operation(summary = "Get checklists by task id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}/checklists")
     public ResponseEntity<List<ChecklistResponse>> getChecklistsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getChecklistsByTaskId(id));
+    }
+    @Operation(summary = "Add executor to task by id")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{id}/executors/{executorId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<TaskResponse> addExecutorToTaskById(@PathVariable UUID id,
+                                                              @PathVariable UUID executorId,
+                                                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.addExecutorToTaskById(id, executorId, userPrincipal.getUser()),
+                HttpStatus.CREATED);
+    }
+    @Operation(summary = "Delete executor from task by id")
+    @SecurityRequirement(name = "JWT")
+    @DeleteMapping("/{id}/executors/{executorId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<TaskResponse> removeExecutorFromTaskById(@PathVariable UUID id,
+                                                              @PathVariable UUID executorId,
+                                                              @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.removeExecutorFromTaskById(id, executorId, userPrincipal.getUser()),
+                HttpStatus.NO_CONTENT);
     }
 }

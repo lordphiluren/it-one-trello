@@ -20,14 +20,7 @@ public class ChecklistMapper {
     private final CheckItemMapper checkItemMapper;
 
     public Checklist toEntity(ChecklistRequest checklistDto) {
-        Checklist checklist =  modelMapper.map(checklistDto, Checklist.class);
-        Set<CheckItem> checkItems = checklistDto.getCheckItems().stream().map(checkItemDto -> {
-            CheckItem checkItem = checkItemMapper.toEntity(checkItemDto);
-            checkItem.setChecklist(checklist);
-            return checkItem;
-        }).collect(Collectors.toSet());
-        checklist.setCheckItems(checkItems);
-        return checklist;
+        return modelMapper.map(checklistDto, Checklist.class);
     }
 
     public ChecklistResponse toDto(Checklist checklist) {

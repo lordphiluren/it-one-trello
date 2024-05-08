@@ -14,4 +14,5 @@ public interface ChecklistRepo extends JpaRepository<Checklist, UUID> {
     List<Checklist> findByTaskId(UUID taskId);
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, value = "checklist-entity-graph")
     Optional<Checklist> findById(UUID id);
+
 }

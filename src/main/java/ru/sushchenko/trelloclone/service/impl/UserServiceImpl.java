@@ -36,7 +36,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public UserResponse getUserById(UUID id) {
         return userMapper.toDto(getExistingUser(id));
     }
@@ -62,7 +61,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public Set<User> getUsersByIdIn(Set<UUID> ids) {
         Set<User> users = userRepo.findByIdIn(ids);
         if(users.isEmpty()) {
@@ -71,8 +69,8 @@ public class UserServiceImpl implements UserService {
             return users;
         }
     }
-
-    private User getExistingUser(UUID id) {
+    @Override
+    public User getExistingUser(UUID id) {
         return userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }

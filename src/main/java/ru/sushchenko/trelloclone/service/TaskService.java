@@ -30,6 +30,8 @@ public interface TaskService {
     TaskResponse getTaskById(UUID id);
     TaskResponse addTask(TaskRequest taskRequest, User creator);
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);
+    TaskResponse addExecutorToTaskById(UUID id, UUID executorId, User currentUser);
+    TaskResponse removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser);
     CommentResponse addCommentToTaskById(UUID id, CommentRequest commentRequest, User currentUser);
     List<AttachmentResponse> addAttachmentsToTaskById(UUID id, List<MultipartFile> attachments, User currentUser);
     ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistRequest, User currentUser);

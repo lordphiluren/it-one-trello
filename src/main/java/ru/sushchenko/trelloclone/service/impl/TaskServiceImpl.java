@@ -96,7 +96,38 @@ public class TaskServiceImpl implements TaskService {
             log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
             return taskMapper.toDto(savedTask);
         } else {
-            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't modify task with id: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public TaskResponse addExecutorToTaskById(UUID id, UUID executorId, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfCreator(task, currentUser)) {
+            User executor = userService.getExistingUser(executorId);
+            task.getExecutors().add(executor);
+            Task savedTask = taskRepo.save(task);
+            log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
+            return taskMapper.toDto(savedTask);
+        } else {
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't modify task with id: " + id);
+        }
+    }
+    @Override
+    @Transactional
+    public TaskResponse removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfCreator(task, currentUser)) {
+            User executor = userService.getExistingUser(executorId);
+            task.getExecutors().removeIf(e -> e.getId().equals(executor.getId()));
+            Task savedTask = taskRepo.save(task);
+            log.info("Executor with id: {} removed from task with id: {} by user with id: {}", executorId,
+                    savedTask.getId(), currentUser.getId());
+            return taskMapper.toDto(savedTask);
+        } else {
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't modify task with id: " + id);
         }
@@ -109,7 +140,6 @@ public class TaskServiceImpl implements TaskService {
         if(checkIfAllowedToModifyTask(task, currentUser)) {
             return commentService.addComment(commentDto, task, currentUser);
         } else {
-            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't write comments in task with id: " + id);
         }
@@ -122,7 +152,6 @@ public class TaskServiceImpl implements TaskService {
         if(checkIfAllowedToModifyTask(task, currentUser)) {
             return attachService.addAttachmentsToTask(task, attachments);
         } else {
-            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't write comments in task with id: " + id);
         }
@@ -135,7 +164,6 @@ public class TaskServiceImpl implements TaskService {
         if(checkIfAllowedToModifyTask(task, currentUser)) {
             return checklistService.addChecklist(checklistDto, task);
         } else {
-            log.warn("User with id: {} tried to modify task with id: {}", currentUser.getId(), task.getId());
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't write comments in task with id: " + id);
         }
@@ -164,7 +192,6 @@ public class TaskServiceImpl implements TaskService {
             taskRepo.deleteById(id);
             log.info("Task with id: {} deleted by user with id: {}", id, currentUser.getId());
         } else {
-            log.warn("User with id: {} tried to delete task with id: {}", currentUser.getId(), task.getId());
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't delete task with id: " + id);
         }
