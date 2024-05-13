@@ -18,7 +18,7 @@
             <column name="id" type="uuid" generationType="BY DEFAULT">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="name" type="varchar(32)">
+            <column name="name" type="varchar(256)">
                 <constraints nullable="false" />
             </column>
             <column name="description" type="varchar"/>

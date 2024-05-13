@@ -19,8 +19,7 @@ public class TagServiceImpl implements TagService {
     private final TagRepo tagRepo;
     @Override
     @Transactional
-    public Set<Tag> updateTaskTags(Set<Tag> tags, Task task) {
+    public void deleteTagsByTask(Task task) {
         tagRepo.deleteAllByTask(task);
-        return new HashSet<>(tagRepo.saveAll(tags));
     }
 }

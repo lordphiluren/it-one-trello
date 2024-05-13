@@ -60,9 +60,9 @@ public class TaskController {
                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addTask(taskDto, userPrincipal.getUser()), HttpStatus.CREATED);
     }
-    @Operation(summary = "Partially update task by id if user is creator or executor")
+    @Operation(summary = "Update task by id if user is creator or executor")
     @SecurityRequirement(name = "JWT")
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<TaskResponse> updateTaskById(@PathVariable UUID id,
                                                        @Valid @RequestBody TaskRequest taskDto,
@@ -143,10 +143,22 @@ public class TaskController {
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}/executors/{executorId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<TaskResponse> removeExecutorFromTaskById(@PathVariable UUID id,
+    public ResponseEntity<ResponseMessage> removeExecutorFromTaskById(@PathVariable UUID id,
                                                               @PathVariable UUID executorId,
                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return new ResponseEntity<>(taskService.removeExecutorFromTaskById(id, executorId, userPrincipal.getUser()),
+        taskService.removeExecutorFromTaskById(id, executorId, userPrincipal.getUser());
+        return new ResponseEntity<>(ResponseMessage.builder().message("Executor successfully removed").build(),
+                HttpStatus.NO_CONTENT);
+    }
+    @Operation(summary = "Delete attachment from task by id")
+    @SecurityRequirement(name = "JWT")
+    @DeleteMapping("/{id}/attachments/{attachmentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<ResponseMessage> removeAttachmentFromTaskById(@PathVariable UUID id,
+                                                                @PathVariable UUID attachmentId,
+                                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        taskService.removeAttachmentFromTaskById(id, attachmentId, userPrincipal.getUser());
+        return new ResponseEntity<>(ResponseMessage.builder().message("Attachment successfully deleted").build(),
                 HttpStatus.NO_CONTENT);
     }
 }

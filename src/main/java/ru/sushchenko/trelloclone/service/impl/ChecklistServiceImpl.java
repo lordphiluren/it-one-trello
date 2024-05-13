@@ -28,9 +28,7 @@ public class ChecklistServiceImpl implements ChecklistService {
     public ChecklistResponse addChecklist(ChecklistRequest checklistDto, Task task) {
         Checklist checklist = checklistMapper.toEntity(checklistDto);
         checklist.setTask(task);
-        Checklist savedChecklist = checklistRepo.save(checklist);
-        log.info("Checklist with id: {} created for task with id: {}", savedChecklist.getId(), task.getId());
-        return checklistMapper.toDto(savedChecklist);
+        return checklistMapper.toDto(checklistRepo.save(checklist));
     }
 
     @Override

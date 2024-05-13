@@ -31,12 +31,13 @@ public interface TaskService {
     TaskResponse addTask(TaskRequest taskRequest, User creator);
     TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser);
     TaskResponse addExecutorToTaskById(UUID id, UUID executorId, User currentUser);
-    TaskResponse removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser);
+    void removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser);
     CommentResponse addCommentToTaskById(UUID id, CommentRequest commentRequest, User currentUser);
     List<AttachmentResponse> addAttachmentsToTaskById(UUID id, List<MultipartFile> attachments, User currentUser);
     ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistRequest, User currentUser);
     List<CommentResponse> getCommentsByTaskId(UUID id);
     List<AttachmentResponse> getAttachmentsByTaskId(UUID id);
     List<ChecklistResponse> getChecklistsByTaskId(UUID id);
+    void removeAttachmentFromTaskById(UUID id, UUID attachmentId, User currentUser);
     void deleteTaskById(UUID id, User creator);
 }

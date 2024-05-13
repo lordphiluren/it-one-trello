@@ -22,6 +22,8 @@ import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.entity.enums.Status;
 import ru.sushchenko.trelloclone.entity.id.TaskTagKey;
+import ru.sushchenko.trelloclone.repo.ChecklistRepo;
+import ru.sushchenko.trelloclone.repo.TagRepo;
 import ru.sushchenko.trelloclone.repo.TaskRepo;
 import ru.sushchenko.trelloclone.repo.spec.TaskSpecification;
 import ru.sushchenko.trelloclone.service.*;
@@ -87,12 +89,14 @@ public class TaskServiceImpl implements TaskService {
     public TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
-            taskMapper.mergeDtoIntoEntity(taskDto, task);
             task.setUpdatedAt(new Date());
             task.setClosedAt(updateClosedAt(task));
             task.setExecutors(createExecutorsFromDto(taskDto));
-            task.setTags(updateTagsFromDto(taskDto, task));
-            Task savedTask = taskRepo.saveAndFlush(task);
+            task.setTags(createTagsFromDto(taskDto, task));
+            taskMapper.mergeDtoIntoEntity(taskDto, task);
+            Task savedTask = taskRepo.save(task);
+            // Clear tags table in order to update tags properly
+            tagService.deleteTagsByTask(savedTask);
             log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
             return taskMapper.toDto(savedTask);
         } else {
@@ -118,7 +122,7 @@ public class TaskServiceImpl implements TaskService {
     }
     @Override
     @Transactional
-    public TaskResponse removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser) {
+    public void removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfCreator(task, currentUser)) {
             User executor = userService.getExistingUser(executorId);
@@ -126,7 +130,6 @@ public class TaskServiceImpl implements TaskService {
             Task savedTask = taskRepo.save(task);
             log.info("Executor with id: {} removed from task with id: {} by user with id: {}", executorId,
                     savedTask.getId(), currentUser.getId());
-            return taskMapper.toDto(savedTask);
         } else {
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't modify task with id: " + id);
@@ -150,10 +153,13 @@ public class TaskServiceImpl implements TaskService {
     public List<AttachmentResponse> addAttachmentsToTaskById(UUID id, List<MultipartFile> attachments, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
-            return attachService.addAttachmentsToTask(task, attachments);
+            List<AttachmentResponse> savedAttachments =  attachService.addAttachmentsToTask(task, attachments);
+            log.info("{} attachments saved for task with id: {} by user with id: {}", savedAttachments.size(),
+                    task.getId(), currentUser.getId());
+            return savedAttachments;
         } else {
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
-                    " can't write comments in task with id: " + id);
+                    " can't add attachments to task with id: " + id);
         }
     }
 
@@ -162,10 +168,12 @@ public class TaskServiceImpl implements TaskService {
     public ChecklistResponse addChecklistToTaskById(UUID id, ChecklistRequest checklistDto, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
-            return checklistService.addChecklist(checklistDto, task);
+            ChecklistResponse savedChecklist = checklistService.addChecklist(checklistDto, task);
+            log.info("Checklist with id: {} created for task with id: {}", savedChecklist.getId(), task.getId());
+            return savedChecklist;
         } else {
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
-                    " can't write comments in task with id: " + id);
+                    " can't add checklists to task with id: " + id);
         }
     }
 
@@ -182,6 +190,20 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public List<ChecklistResponse> getChecklistsByTaskId(UUID id) {
         return checklistService.getChecklistsByTaskId(id);
+    }
+
+    @Override
+    @Transactional
+    public void removeAttachmentFromTaskById(UUID id, UUID attachmentId, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfAllowedToModifyTask(task, currentUser)) {
+            attachService.deleteAttachmentById(attachmentId);
+            log.info("Attachment with id: {} deleted from task with id: {} by user with id: {}", attachmentId, id,
+                    currentUser.getId());
+        } else {
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't remove attachments from task with id: " + id);
+        }
     }
 
     @Override
@@ -226,10 +248,6 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<Tag> updateTagsFromDto(TaskRequest taskDto, Task task) {
-        return tagService.updateTaskTags(createTagsFromDto(taskDto, task), task);
-    }
-
     private Date updateClosedAt(Task task) {
         return task.getStatus() == Status.DONE ? new Date() : null;
     }
@@ -266,9 +284,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private boolean checkIfExecutor(Task task, User currentUser) {
-         return task.getExecutors().stream()
-                 .map(User::getId)
-                 .collect(Collectors.toSet())
-                 .contains(currentUser.getId());
+        return task.getExecutors().stream()
+                .anyMatch(executor -> Objects.equals(executor.getId(), currentUser.getId()));
     }
 }

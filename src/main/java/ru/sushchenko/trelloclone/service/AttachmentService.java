@@ -10,4 +10,5 @@ import java.util.UUID;
 public interface AttachmentService {
     List<AttachmentResponse> addAttachmentsToTask(Task task, List<MultipartFile> attachments);
     List<AttachmentResponse> getAttachmentsByTaskId(UUID taskId);
+    void deleteAttachmentById(UUID id);
 }

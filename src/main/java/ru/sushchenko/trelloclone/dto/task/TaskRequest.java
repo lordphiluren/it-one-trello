@@ -23,6 +23,7 @@ import java.util.UUID;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TaskRequest {
+    @Size(max = 256, message = "Task name length can't be greater than 32")
     @NotBlank(message = "Task name can't be null")
     private String name;
     @Size(max = 1024, message = "Task description length can't be more than 1024")

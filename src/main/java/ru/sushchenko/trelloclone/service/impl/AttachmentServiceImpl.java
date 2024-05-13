@@ -31,9 +31,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     @Transactional
     public List<AttachmentResponse> addAttachmentsToTask(Task task, List<MultipartFile> attachments) {
         Set<String> urls = uploadAttachments(attachments);
-        List<TaskAttachment> savedAttachments = attachRepo.saveAll(createAttachmentsFromUrls(urls, task));
-        log.info("{} attachments saved for task with id: {}", savedAttachments.size(), task.getId());
-        return savedAttachments.stream()
+        return attachRepo.saveAll(createAttachmentsFromUrls(urls, task)).stream()
                 .map(attachMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -43,6 +41,14 @@ public class AttachmentServiceImpl implements AttachmentService {
         return attachRepo.findByTaskId(taskId).stream()
                 .map(attachMapper::toDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteAttachmentById(UUID id) {
+        // TODO
+        // make deleting attachments in the cloud
+        attachRepo.deleteById(id);
     }
 
     private Set<TaskAttachment> createAttachmentsFromUrls(Set<String> urls, Task task) {

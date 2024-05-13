@@ -11,7 +11,5 @@ import ru.sushchenko.trelloclone.entity.id.TaskTagKey;
 
 @Repository
 public interface TagRepo extends JpaRepository<Tag, TaskTagKey> {
-    @Modifying
-    @Query("delete from Tag t where t.task = ?1")
     void deleteAllByTask(Task task);
 }
