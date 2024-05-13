@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
 import ru.sushchenko.trelloclone.dto.auth.AuthResponse;
+import ru.sushchenko.trelloclone.dto.auth.RegistrationRequest;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.entity.enums.Role;
 import ru.sushchenko.trelloclone.repo.UserRepo;
@@ -45,12 +46,12 @@ public class AuthServiceImpl implements AuthService {
     }
     @Transactional
     @Override
-    public void signUp(AuthRequest authRequest) {
+    public void signUp(RegistrationRequest authRequest) {
         User user = userMapper.toEntity(authRequest);
         user.setRole(Role.ROLE_USER);
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         try {
-            User savedUser = userRepo.save(user);
+            User savedUser = userRepo.saveAndFlush(user);
             log.info("User with username : {} registered", savedUser.getUsername());
         } catch (DataIntegrityViolationException e) {
             throw new EntityAlreadyExistException("User with this username or email already exists");

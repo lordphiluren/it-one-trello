@@ -10,6 +10,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
 import ru.sushchenko.trelloclone.dto.auth.AuthResponse;
+import ru.sushchenko.trelloclone.dto.auth.RegistrationRequest;
 import ru.sushchenko.trelloclone.service.AuthService;
 import ru.sushchenko.trelloclone.utils.validation.LoginRequest;
 
@@ -25,7 +26,7 @@ public class AuthController {
     )
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<AuthResponse> login(@Validated({LoginRequest.class}) @RequestBody AuthRequest authRequest) {
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         return ResponseEntity.ok(authService.attemptLogin(authRequest.getUsername(), authRequest.getPassword()));
     }
     @Operation(
@@ -34,7 +35,7 @@ public class AuthController {
     )
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> signUp(@Valid @RequestBody AuthRequest authRequest) {
+    public ResponseEntity<?> signUp(@Valid @RequestBody RegistrationRequest authRequest) {
         authService.signUp(authRequest);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

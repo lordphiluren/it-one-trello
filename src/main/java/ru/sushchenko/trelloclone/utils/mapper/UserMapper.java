@@ -5,6 +5,7 @@ import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.sushchenko.trelloclone.dto.auth.AuthRequest;
+import ru.sushchenko.trelloclone.dto.auth.RegistrationRequest;
 import ru.sushchenko.trelloclone.dto.user.UserRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
@@ -17,6 +18,9 @@ public class UserMapper {
         return modelMapper.map(userDto, User.class);
     }
     public User toEntity(AuthRequest authDto) {
+        return modelMapper.map(authDto, User.class);
+    }
+    public User toEntity(RegistrationRequest authDto) {
         return modelMapper.map(authDto, User.class);
     }
 
