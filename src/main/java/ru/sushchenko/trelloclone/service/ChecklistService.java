@@ -10,4 +10,6 @@ import java.util.UUID;
 public interface ChecklistService {
     ChecklistResponse addChecklist(ChecklistRequest checklistDto, Task task);
     List<ChecklistResponse> getChecklistsByTaskId(UUID taskId);
+    void deleteChecklistById(UUID id);
+    ChecklistResponse updateChecklistById(UUID checklistId, ChecklistRequest checklistDto);
 }

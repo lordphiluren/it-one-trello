@@ -5,6 +5,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
+import ru.sushchenko.trelloclone.dto.ResponseMessage;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
@@ -38,6 +39,8 @@ public interface TaskService {
     List<CommentResponse> getCommentsByTaskId(UUID id);
     List<AttachmentResponse> getAttachmentsByTaskId(UUID id);
     List<ChecklistResponse> getChecklistsByTaskId(UUID id);
+    void deleteChecklistById(UUID id, UUID checklistId, User currentUser);
     void removeAttachmentFromTaskById(UUID id, UUID attachmentId, User currentUser);
     void deleteTaskById(UUID id, User creator);
+    ChecklistResponse updateChecklistById(UUID id, UUID checklistId, ChecklistRequest checklistDto, User user);
 }

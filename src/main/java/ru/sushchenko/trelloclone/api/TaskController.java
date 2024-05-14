@@ -76,8 +76,7 @@ public class TaskController {
     public ResponseEntity<ResponseMessage> deleteTaskById(@PathVariable UUID id,
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.deleteTaskById(id, userPrincipal.getUser());
-        return new ResponseEntity<>(ResponseMessage.builder().message("Task successfully deleted").build(),
-                HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     @Operation(summary = "Add comment to task by id")
     @SecurityRequirement(name = "JWT")
@@ -114,22 +113,6 @@ public class TaskController {
     public ResponseEntity<List<AttachmentResponse>> getAttachmentsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getAttachmentsByTaskId(id));
     }
-    @Operation(summary = "Add checklist to task by id")
-    @SecurityRequirement(name = "JWT")
-    @PostMapping("/{id}/checklists")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<ChecklistResponse> addChecklistToTaskById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody ChecklistRequest checklistDto,
-                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return new ResponseEntity<>(taskService.addChecklistToTaskById(id, checklistDto, userPrincipal.getUser()),
-                HttpStatus.CREATED);
-    }
-    @Operation(summary = "Get checklists by task id")
-    @SecurityRequirement(name = "JWT")
-    @GetMapping("/{id}/checklists")
-    public ResponseEntity<List<ChecklistResponse>> getChecklistsByTaskId(@PathVariable UUID id) {
-        return ResponseEntity.ok(taskService.getChecklistsByTaskId(id));
-    }
     @Operation(summary = "Add executor to task by id")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/{id}/executors/{executorId}")
@@ -148,8 +131,7 @@ public class TaskController {
                                                               @PathVariable UUID executorId,
                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.removeExecutorFromTaskById(id, executorId, userPrincipal.getUser());
-        return new ResponseEntity<>(ResponseMessage.builder().message("Executor successfully removed").build(),
-                HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
     @Operation(summary = "Delete attachment from task by id")
     @SecurityRequirement(name = "JWT")
@@ -159,7 +141,42 @@ public class TaskController {
                                                                 @PathVariable UUID attachmentId,
                                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.removeAttachmentFromTaskById(id, attachmentId, userPrincipal.getUser());
-        return new ResponseEntity<>(ResponseMessage.builder().message("Attachment successfully deleted").build(),
-                HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @Operation(summary = "Add checklist to task by id")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{id}/checklists")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<ChecklistResponse> addChecklistToTaskById(@PathVariable UUID id,
+                                                                    @Valid @RequestBody ChecklistRequest checklistDto,
+                                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return new ResponseEntity<>(taskService.addChecklistToTaskById(id, checklistDto, userPrincipal.getUser()),
+                HttpStatus.CREATED);
+    }
+    @Operation(summary = "Get checklists by task id")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("/{id}/checklists")
+    public ResponseEntity<List<ChecklistResponse>> getChecklistsByTaskId(@PathVariable UUID id) {
+        return ResponseEntity.ok(taskService.getChecklistsByTaskId(id));
+    }
+    @Operation(summary = "Delete checklist from task by id")
+    @SecurityRequirement(name = "JWT")
+    @DeleteMapping("/{id}/checklists/{checklistId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<ResponseMessage> deleteChecklistById(@PathVariable UUID id,
+                                                               @PathVariable UUID checklistId,
+                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        taskService.deleteChecklistById(id, checklistId, userPrincipal.getUser());
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+    @Operation(summary = "Update checklist on task by id")
+    @SecurityRequirement(name = "JWT")
+    @PutMapping("/{id}/checklists/{checklistId}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<ChecklistResponse> updateChecklistById(@PathVariable UUID id,
+                                                               @PathVariable UUID checklistId,
+                                                               @Valid @RequestBody ChecklistRequest checklistDto,
+                                                               @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(taskService.updateChecklistById(id, checklistId, checklistDto, userPrincipal.getUser()));
     }
 }

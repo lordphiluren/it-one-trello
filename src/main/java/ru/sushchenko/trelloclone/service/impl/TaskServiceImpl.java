@@ -95,7 +95,6 @@ public class TaskServiceImpl implements TaskService {
             task.setTags(createTagsFromDto(taskDto, task));
             taskMapper.mergeDtoIntoEntity(taskDto, task);
             Task savedTask = taskRepo.save(task);
-            // Clear tags table in order to update tags properly
             tagService.deleteTagsByTask(savedTask);
             log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
             return taskMapper.toDto(savedTask);
@@ -194,6 +193,20 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
+    public void deleteChecklistById(UUID id, UUID checklistId, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfAllowedToModifyTask(task, currentUser)) {
+            checklistService.deleteChecklistById(checklistId);
+            log.info("Checklist with id: {} deleted from task with id: {} by user with id: {}", checklistId, id,
+                    currentUser.getId());
+        } else {
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't modify task with id: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
     public void removeAttachmentFromTaskById(UUID id, UUID attachmentId, User currentUser) {
         Task task = getExistingTask(id);
         if(checkIfAllowedToModifyTask(task, currentUser)) {
@@ -216,6 +229,21 @@ public class TaskServiceImpl implements TaskService {
         } else {
             throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
                     " can't delete task with id: " + id);
+        }
+    }
+
+    @Override
+    @Transactional
+    public ChecklistResponse updateChecklistById(UUID id, UUID checklistId,
+                                                 ChecklistRequest checklistDto, User currentUser) {
+        Task task = getExistingTask(id);
+        if(checkIfAllowedToModifyTask(task, currentUser)) {
+            ChecklistResponse updatedChecklist = checklistService.updateChecklistById(checklistId, checklistDto);
+            log.info("Checklist with id: {} updated by user with id: {}", checklistId, currentUser.getId());
+            return updatedChecklist;
+        } else {
+            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
+                    " can't add modify task with id: " + id);
         }
     }
 
