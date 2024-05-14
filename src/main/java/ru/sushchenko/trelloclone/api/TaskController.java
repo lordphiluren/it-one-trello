@@ -76,7 +76,8 @@ public class TaskController {
     public ResponseEntity<ResponseMessage> deleteTaskById(@PathVariable UUID id,
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.deleteTaskById(id, userPrincipal.getUser());
-        return ResponseEntity.ok(ResponseMessage.builder().message("Task successfully deleted").build());
+        return new ResponseEntity<>(ResponseMessage.builder().message("Task successfully deleted").build(),
+                HttpStatus.NO_CONTENT);
     }
     @Operation(summary = "Add comment to task by id")
     @SecurityRequirement(name = "JWT")

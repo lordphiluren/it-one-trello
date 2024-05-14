@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface CommentService {
     CommentResponse addComment(CommentRequest commentDto, Task task, User creator);
     List<CommentResponse> getCommentsByTaskId(UUID taskId);
+    CommentResponse updateCommentById(UUID id, CommentRequest commentDto, User currentUser);
+    void deleteCommentById(UUID id, User currentUser);
 }
