@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @ResponseStatus(code = HttpStatus.NOT_FOUND)
-public class UserNotFoundException extends RestException {
+public class UserNotFoundException extends RuntimeException {
     private static final String USERNAME_PREFIX = "User wasn't found by username: %s";
     private static final String ID_PREFIX = "User wasn't found by id: %s";
     private static final String IDS_PREFIX = "User wasn't found by id in: %s";

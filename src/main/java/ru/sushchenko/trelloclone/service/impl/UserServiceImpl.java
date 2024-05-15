@@ -55,8 +55,7 @@ public class UserServiceImpl implements UserService {
             }
         } else {
             log.warn("User with id: {} tried to modify user with id: {}", currentUser.getId(), user.getId());
-            throw new NotEnoughPermissionsException("User with id: " + currentUser.getId() +
-                    " can't modify user with id: " + id);
+            throw new NotEnoughPermissionsException(currentUser.getId(), id);
         }
     }
 

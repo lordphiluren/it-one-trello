@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CommentService {
-    CommentResponse addComment(CommentRequest commentDto, Task task, User creator);
+    CommentResponse addCommentToTaskById(UUID taskId,CommentRequest commentDto,User currentUser);
     List<CommentResponse> getCommentsByTaskId(UUID taskId);
     CommentResponse updateCommentById(UUID id, CommentRequest commentDto, User currentUser);
     void deleteCommentById(UUID id, User currentUser);

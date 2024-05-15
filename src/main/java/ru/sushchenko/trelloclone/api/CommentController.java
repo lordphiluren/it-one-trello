@@ -9,11 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import ru.sushchenko.trelloclone.dto.ResponseMessage;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
-import ru.sushchenko.trelloclone.dto.task.TaskRequest;
-import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.CommentService;
 
@@ -38,10 +35,9 @@ public class CommentController {
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity<ResponseMessage> deleteTaskById(@PathVariable UUID id,
+    public ResponseEntity<?> deleteTaskById(@PathVariable UUID id,
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         commentService.deleteCommentById(id, userPrincipal.getUser());
-        return new ResponseEntity<>(ResponseMessage.builder().message("Comment successfully deleted").build(),
-                HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

@@ -9,9 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.TaskAttachment;
+import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.repo.AttachmentRepo;
 import ru.sushchenko.trelloclone.service.AttachmentService;
+import ru.sushchenko.trelloclone.service.TaskService;
 import ru.sushchenko.trelloclone.service.UploadService;
+import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
+import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.AttachmentMapper;
 
 import java.util.HashSet;
@@ -27,13 +31,25 @@ public class AttachmentServiceImpl implements AttachmentService {
     private final AttachmentRepo attachRepo;
     private final UploadService uploadService;
     private final AttachmentMapper attachMapper;
+    private final TaskService taskService;
     @Override
     @Transactional
-    public List<AttachmentResponse> addAttachmentsToTask(Task task, List<MultipartFile> attachments) {
-        Set<String> urls = uploadAttachments(attachments);
-        return attachRepo.saveAll(createAttachmentsFromUrls(urls, task)).stream()
-                .map(attachMapper::toDto)
-                .collect(Collectors.toList());
+    public List<AttachmentResponse> addAttachmentsToTask(UUID taskId,
+                                                         List<MultipartFile> attachments,
+                                                         User currentUser) {
+        Task task = taskService.getExistingTask(taskId);
+        if(taskService.checkIfAllowedToModifyTask(task, currentUser)) {
+            Set<String> urls = uploadAttachments(attachments);
+            List<TaskAttachment> savedAttachments = attachRepo.saveAll(createAttachmentsFromUrls(urls, task));
+            log.info("{} attachments saved for task with id: {} by user with id: {}", savedAttachments.size(),
+                    task.getId(), currentUser.getId());
+            return savedAttachments.stream()
+                    .map(attachMapper::toDto)
+                    .collect(Collectors.toList());
+
+        } else {
+            throw new NotEnoughPermissionsException(currentUser.getId(), taskId);
+        }
     }
 
     @Override
@@ -45,12 +61,25 @@ public class AttachmentServiceImpl implements AttachmentService {
 
     @Override
     @Transactional
-    public void deleteAttachmentById(UUID id) {
-        // TODO
-        // make deleting attachments in the cloud
-        attachRepo.deleteById(id);
+    public void removeAttachmentFromTaskById(UUID taskId, UUID attachmentId, User currentUser) {
+        Task task = taskService.getExistingTask(taskId);
+        if(taskService.checkIfAllowedToModifyTask(task, currentUser)) {
+            TaskAttachment attachment = getExistingAttachment(attachmentId);
+            if(attachment.getTask().getId().equals(task.getId())) {
+                attachRepo.deleteById(attachmentId);
+                log.info("Attachment with id: {} deleted from task with id: {} by user with id: {}", attachmentId,
+                        taskId, currentUser.getId());
+            } else {
+                throw new IllegalArgumentException("Attachment with id: " + attachmentId +
+                        " doesn't belong to task with id: " + taskId);
+            }
+        } else {
+            throw new NotEnoughPermissionsException(currentUser.getId(), taskId);
+        }
     }
-
+    private TaskAttachment getExistingAttachment(UUID id) {
+        return attachRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+    }
     private Set<TaskAttachment> createAttachmentsFromUrls(Set<String> urls, Task task) {
         return urls.stream().map(url -> new TaskAttachment(null, url, task)).collect(Collectors.toSet());
     }
