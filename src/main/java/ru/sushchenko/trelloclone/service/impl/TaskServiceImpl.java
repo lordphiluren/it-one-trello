@@ -153,7 +153,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void validatePermissions(Task task, User currentUser) {
-        if(!checkIfCreator(task, currentUser) || !checkIfExecutor(task, currentUser)) {
+        if(!checkIfCreator(task, currentUser) && !checkIfExecutor(task, currentUser)) {
             throw new NotEnoughPermissionsException(currentUser.getId(), task.getId());
         }
     }
