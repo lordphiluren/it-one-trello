@@ -91,6 +91,7 @@ public class CheckItemServiceImpl implements CheckItemService {
         checkItemRepo.deleteById(checkItemId);
         log.info("Checkitem with id: {} deleted by user with id: {}", checkItemId, currentUser.getId());
     }
+
     private CheckItem getExistingCheckItem(UUID id) {
         return checkItemRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }

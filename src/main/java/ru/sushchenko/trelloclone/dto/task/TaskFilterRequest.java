@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Min;
 import lombok.*;
-import org.modelmapper.internal.bytebuddy.asm.MemberSubstitution;
-import org.springframework.data.domain.Pageable;
 import ru.sushchenko.trelloclone.entity.enums.Priority;
 import ru.sushchenko.trelloclone.entity.enums.Status;
 

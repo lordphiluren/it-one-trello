@@ -1,9 +1,11 @@
 package ru.sushchenko.trelloclone.api;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import ru.sushchenko.trelloclone.utils.exception.ControllerErrorResponse;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +27,7 @@ public class GlobalExceptionHandler {
         HttpStatus httpStatus = responseStatus != null ? responseStatus.value() : HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(errorResponse, httpStatus);
     }
+
     // validation exception handler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -34,6 +38,27 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        return new ResponseEntity<>(errors, new HttpHeaders(), HttpStatus.BAD_REQUEST);
+    }
+
+    // Enum deserialization exception handler
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+        Map<String, String> errors = new HashMap<>();
+
+        if (cause instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) cause;
+            String fieldName = ife.getPath().get(0).getFieldName();
+            String errorMessage = String.format("Invalid value '%s' for field '%s'. Allowed values are: %s",
+                    ife.getValue(),
+                    fieldName,
+                    Arrays.toString(ife.getTargetType().getEnumConstants()));
+            errors.put(fieldName, errorMessage);
+        } else {
+            errors.put("error", "Invalid request");
+        }
+
         return new ResponseEntity<>(errors, new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

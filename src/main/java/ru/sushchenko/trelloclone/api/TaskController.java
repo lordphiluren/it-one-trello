@@ -45,18 +45,21 @@ public class TaskController {
     public ResponseEntity<List<TaskResponse>> getAllTasks() {
         return ResponseEntity.ok(taskService.getAllTasks());
     }
+
     @Operation(summary = "Get all tasks with dynamic filter")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/filters")
     public ResponseEntity<List<TaskResponse>> getAllTasksWithFilters(@Valid @RequestBody(required = false) TaskFilterRequest taskFilter) {
         return ResponseEntity.ok(taskService.getAllTasksWithFilters(taskFilter));
     }
+
     @Operation(summary = "Get task by id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}")
     public ResponseEntity<TaskResponse> getTaskById(@PathVariable UUID id) {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
+
     @Operation(summary = "Add task")
     @SecurityRequirement(name = "JWT")
     @PostMapping("")
@@ -65,6 +68,7 @@ public class TaskController {
                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(taskService.addTask(taskDto, userPrincipal.getUser()), HttpStatus.CREATED);
     }
+
     @Operation(summary = "Update task by id if user is creator or executor")
     @SecurityRequirement(name = "JWT")
     @PutMapping("/{id}")
@@ -74,6 +78,7 @@ public class TaskController {
                                                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(taskService.updateTaskById(id, taskDto, userPrincipal.getUser()));
     }
+
     @Operation(summary = "Delete task by id if user is creator")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}")
@@ -83,6 +88,7 @@ public class TaskController {
         taskService.deleteTaskById(id, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @Operation(summary = "Add comment to task by id")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/{id}/comments")
@@ -93,12 +99,14 @@ public class TaskController {
         return new ResponseEntity<>(commentService.addCommentToTaskById(id, commentDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
+
     @Operation(summary = "Get comments by task id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}/comments")
     public ResponseEntity<List<CommentResponse>> getCommentsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(commentService.getCommentsByTaskId(id));
     }
+
     @Operation(summary = "Add attachments to task by id")
     @SecurityRequirement(name = "JWT")
     @RequestMapping(value = "/{id}/attachments",
@@ -112,12 +120,14 @@ public class TaskController {
         return new ResponseEntity<>(attachmentService.addAttachmentsToTask(id, attachments, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
+
     @Operation(summary = "Get attachments by task id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}/attachments")
     public ResponseEntity<List<AttachmentResponse>> getAttachmentsByTaskId(@PathVariable UUID id) {
         return ResponseEntity.ok(attachmentService.getAttachmentsByTaskId(id));
     }
+
     @Operation(summary = "Add executor to task by id")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/{id}/executors/{executorId}")
@@ -128,6 +138,7 @@ public class TaskController {
         return new ResponseEntity<>(taskService.addExecutorToTaskById(id, executorId, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
+
     @Operation(summary = "Delete executor from task by id")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}/executors/{executorId}")
@@ -138,6 +149,7 @@ public class TaskController {
         taskService.removeExecutorFromTaskById(id, executorId, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @Operation(summary = "Delete attachment from task by id")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}/attachments/{attachmentId}")
@@ -148,6 +160,7 @@ public class TaskController {
         attachmentService.removeAttachmentFromTaskById(id, attachmentId, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @Operation(summary = "Add checklist to task by id")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/{id}/checklists")
@@ -158,6 +171,7 @@ public class TaskController {
         return new ResponseEntity<>(checklistService.addChecklistToTask(id, checklistDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);
     }
+
     @Operation(summary = "Get checklists by task id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}/checklists")

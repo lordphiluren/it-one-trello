@@ -23,6 +23,7 @@ public class UploadServiceImpl implements UploadService {
     private final RestTemplate rest;
     @Value("${upload-server.url}")
     private String serverUrl;
+
     public static final String UPLOAD_API_PREFIX = "/api/v1/uploads";
 
     @Override

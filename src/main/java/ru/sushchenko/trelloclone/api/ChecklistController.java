@@ -37,6 +37,7 @@ public class ChecklistController {
         checklistService.deleteChecklistById(id, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
     @Operation(summary = "Update checklist on task by id")
     @SecurityRequirement(name = "JWT")
     @PutMapping("/{id}")
@@ -46,6 +47,7 @@ public class ChecklistController {
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(checklistService.updateChecklistById(id, checklistDto, userPrincipal.getUser()));
     }
+
     @Operation(summary = "Add check items to checklist")
     @SecurityRequirement(name = "JWT")
     @PostMapping("/{id}/checkitems")
@@ -57,6 +59,7 @@ public class ChecklistController {
                 checkItemService.addCheckItemsToChecklistById(id, checkItemsDto, userPrincipal.getUser())
         );
     }
+
     @Operation(summary = "Update check item on checklist")
     @SecurityRequirement(name = "JWT")
     @PutMapping("/{id}/checkitems/{checkItemId}")
@@ -69,6 +72,7 @@ public class ChecklistController {
                 checkItemService.updateCheckItemById(id, checkItemId, checkItemDto, userPrincipal.getUser())
         );
     }
+
     @Operation(summary = "Delete check item from checklist")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}/checkitems/{checkItemId}")

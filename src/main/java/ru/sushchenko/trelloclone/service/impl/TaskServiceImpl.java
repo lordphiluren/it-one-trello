@@ -224,6 +224,7 @@ public class TaskServiceImpl implements TaskService {
         enrichTask(task);
         return task;
     }
+
     private boolean checkIfCreator(Task task, User currentUser) {
         return Objects.equals(task.getCreator().getId(), currentUser.getId());
     }

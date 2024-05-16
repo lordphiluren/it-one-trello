@@ -22,6 +22,7 @@ import java.util.UUID;
 @Tag(name = "Comments", description = "Comments related actions")
 public class CommentController {
     private final CommentService commentService;
+
     @Operation(summary = "Update comment by id if user is creator")
     @SecurityRequirement(name = "JWT")
     @PutMapping("/{id}")
@@ -31,6 +32,7 @@ public class CommentController {
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(commentService.updateCommentById(id, commentDto, userPrincipal.getUser()));
     }
+
     @Operation(summary = "Delete comment by id if user is creator")
     @SecurityRequirement(name = "JWT")
     @DeleteMapping("/{id}")

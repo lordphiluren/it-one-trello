@@ -24,18 +24,21 @@ import java.util.UUID;
 @Tag(name = "Users", description = "User account actions")
 public class UserController {
     private final UserService userService;
+
     @Operation(summary = "Get all users")
     @SecurityRequirement(name = "JWT")
     @GetMapping("")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
+
     @Operation(summary = "Get user by id")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUserInfo(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
+
     @Operation(summary = "Partial update of user info by id")
     @SecurityRequirement(name = "JWT")
     @PatchMapping(path = "/{id}")
