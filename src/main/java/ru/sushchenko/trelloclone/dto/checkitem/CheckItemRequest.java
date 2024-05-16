@@ -1,4 +1,4 @@
-package ru.sushchenko.trelloclone.dto.checklist.checkitem;
+package ru.sushchenko.trelloclone.dto.checkitem;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;

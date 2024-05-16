@@ -39,23 +39,22 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserById(UUID id) {
         return userMapper.toDto(getExistingUser(id));
     }
+
     @Override
     @Transactional
     public UserResponse updateUserById(UUID id, UserRequest userDto, User currentUser) {
         User user = getExistingUser(id);
-        if(checkIfAllowedToModifyUser(user, currentUser)) {
-            try {
-                userMapper.mergeDtoIntoEntity(userDto, user);
-                User savedUser = userRepo.saveAndFlush(user);
-                log.info("User with id: {} updated", savedUser.getId());
-                return userMapper.toDto(savedUser);
-            }
-            catch (DataIntegrityViolationException e) {
-                throw new EntityAlreadyExistException("User with this username or email already exists");
-            }
-        } else {
-            log.warn("User with id: {} tried to modify user with id: {}", currentUser.getId(), user.getId());
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
+
+        validateOwnership(user, currentUser);
+
+        try {
+            userMapper.mergeDtoIntoEntity(userDto, user);
+            User savedUser = userRepo.saveAndFlush(user);
+            log.info("User with id: {} updated", savedUser.getId());
+            return userMapper.toDto(savedUser);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new EntityAlreadyExistException("User with this username or email already exists");
         }
     }
 
@@ -68,11 +67,19 @@ public class UserServiceImpl implements UserService {
             return users;
         }
     }
+
     @Override
     public User getExistingUser(UUID id) {
         return userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }
+
+    private void validateOwnership(User user, User currentUser) {
+        if(!checkIfAllowedToModifyUser(user, currentUser)) {
+            throw new NotEnoughPermissionsException(currentUser.getId(), user.getId());
+        }
+    }
+
     private boolean checkIfAllowedToModifyUser(User user, User currentUser) {
         return Objects.equals(user.getId(), currentUser.getId());
     }

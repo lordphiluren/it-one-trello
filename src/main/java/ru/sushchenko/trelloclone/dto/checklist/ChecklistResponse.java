@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.*;
-import ru.sushchenko.trelloclone.dto.checklist.checkitem.CheckItemResponse;
+import ru.sushchenko.trelloclone.dto.checkitem.CheckItemResponse;
 
 import java.util.Set;
 import java.util.UUID;

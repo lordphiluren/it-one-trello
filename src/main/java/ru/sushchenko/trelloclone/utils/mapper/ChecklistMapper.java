@@ -6,8 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
-import ru.sushchenko.trelloclone.dto.checklist.checkitem.CheckItemResponse;
-import ru.sushchenko.trelloclone.entity.CheckItem;
+import ru.sushchenko.trelloclone.dto.checkitem.CheckItemResponse;
 import ru.sushchenko.trelloclone.entity.Checklist;
 
 import java.util.Set;

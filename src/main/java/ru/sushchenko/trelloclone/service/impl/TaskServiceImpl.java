@@ -24,6 +24,7 @@ import ru.sushchenko.trelloclone.repo.TaskRepo;
 import ru.sushchenko.trelloclone.repo.spec.TaskSpecification;
 import ru.sushchenko.trelloclone.service.*;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
+import ru.sushchenko.trelloclone.utils.exception.ResourceMismatchException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
 
@@ -45,6 +46,7 @@ public class TaskServiceImpl implements TaskService {
                 .map(taskMapper::toDto)
                 .collect(Collectors.toList());
     }
+
     @Override
     public List<TaskResponse> getAllTasksWithFilters(TaskFilterRequest taskFilter) {
         List<Task> task;
@@ -59,88 +61,115 @@ public class TaskServiceImpl implements TaskService {
                 .map(taskMapper::toDto)
                 .collect(Collectors.toList());
     }
+
     @Override
     public TaskResponse getTaskById(UUID id) {
         return taskMapper.toDto(getExistingTask(id));
     }
+
     @Override
     @Transactional
     public TaskResponse addTask(TaskRequest taskDto, User creator) {
         Task task = createTaskFromDto(taskDto);
+
         task.setCreator(creator);
         task.setExecutors(createExecutorsFromDto(taskDto));
         task.setTags(createTagsFromDto(taskDto, task));
+
         Task savedTask = taskRepo.save(task);
         log.info("Task with id: {} created", savedTask.getId());
         return taskMapper.toDto(savedTask);
     }
+
     @Override
     @Transactional
     public TaskResponse updateTaskById(UUID id, TaskRequest taskDto, User currentUser) {
         Task task = getExistingTask(id);
-        if(checkIfAllowedToModifyTask(task, currentUser)) {
-            task.setUpdatedAt(new Date());
-            task.setClosedAt(updateClosedAt(task));
-            task.setExecutors(createExecutorsFromDto(taskDto));
-            task.setTags(createTagsFromDto(taskDto, task));
 
-            taskMapper.mergeDtoIntoEntity(taskDto, task);
+        validatePermissions(task, currentUser);
 
-            Task savedTask = taskRepo.save(task);
-            tagService.deleteTagsByTask(savedTask);
-            log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
-            return taskMapper.toDto(savedTask);
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
-        }
+        task.setUpdatedAt(new Date());
+        task.setClosedAt(updateClosedAt(task));
+        task.setExecutors(createExecutorsFromDto(taskDto));
+        task.setTags(createTagsFromDto(taskDto, task));
+
+        taskMapper.mergeDtoIntoEntity(taskDto, task);
+
+        Task savedTask = taskRepo.save(task);
+        tagService.deleteTagsByTask(savedTask);
+        log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
+        return taskMapper.toDto(savedTask);
     }
+
     @Override
     @Transactional
     public TaskResponse addExecutorToTaskById(UUID id, UUID executorId, User currentUser) {
         Task task = getExistingTask(id);
-        if(checkIfCreator(task, currentUser)) {
-            User executor = userService.getExistingUser(executorId);
-            task.getExecutors().add(executor);
-            Task savedTask = taskRepo.save(task);
-            log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
-            return taskMapper.toDto(savedTask);
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
-        }
+
+        validateOwnership(task, currentUser);
+
+        User executor = userService.getExistingUser(executorId);
+        Set<User> executorsToUpdate = new HashSet<>(task.getExecutors());
+        executorsToUpdate.add(executor);
+
+        task.setExecutors(executorsToUpdate);
+        Task savedTask = taskRepo.save(task);
+        log.info("Task with id: {} updated by user with id: {}", savedTask.getId(), currentUser.getId());
+        return taskMapper.toDto(savedTask);
+
     }
+
     @Override
     @Transactional
     public void removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser) {
         Task task = getExistingTask(id);
-        if(checkIfCreator(task, currentUser)) {
-            User executor = userService.getExistingUser(executorId);
-            task.getExecutors().removeIf(e -> e.getId().equals(executor.getId()));
+
+        validateOwnership(task, currentUser);
+
+        Set<User> executorsToUpdate = new HashSet<>(task.getExecutors());
+        boolean isRemoved = executorsToUpdate.removeIf(e -> e.getId().equals(executorId));
+
+        if(isRemoved) {
+            task.setExecutors(executorsToUpdate);
             Task savedTask = taskRepo.save(task);
             log.info("Executor with id: {} removed from task with id: {} by user with id: {}", executorId,
                     savedTask.getId(), currentUser.getId());
         } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
+            throw new ResourceMismatchException("Executor with id: " + executorId +
+                    " doesn't belong to task with id: " + id);
         }
     }
+
     @Override
     @Transactional
     public void deleteTaskById(UUID id, User currentUser) {
         Task task = getExistingTask(id);
-        if(checkIfCreator(task, currentUser)) {
-            taskRepo.deleteById(id);
-            log.info("Task with id: {} deleted by user with id: {}", id, currentUser.getId());
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
+
+        validateOwnership(task, currentUser);
+
+        taskRepo.deleteById(id);
+        log.info("Task with id: {} deleted by user with id: {}", id, currentUser.getId());
+    }
+
+    @Override
+    public void validatePermissions(Task task, User currentUser) {
+        if(!checkIfCreator(task, currentUser) || !checkIfExecutor(task, currentUser)) {
+            throw new NotEnoughPermissionsException(currentUser.getId(), task.getId());
         }
     }
+
     @Override
-    public boolean checkIfAllowedToModifyTask(Task task, User currentUser) {
-        return checkIfCreator(task, currentUser) || checkIfExecutor(task, currentUser);
+    public void validateOwnership(Task task, User currentUser) {
+        if(!checkIfCreator(task, currentUser)) {
+            throw new NotEnoughPermissionsException(currentUser.getId(), task.getId());
+        }
     }
+
     @Override
     public Task getExistingTask(UUID id) {
         return taskRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
     private Pageable getPageableFromFilter(TaskFilterRequest taskFilter) {
         int index = taskFilter.getPageIndex() != null ? taskFilter.getPageIndex() : 0;
         int size = taskFilter.getPageSize() != null ? taskFilter.getPageSize() : 50;
@@ -151,10 +180,12 @@ public class TaskServiceImpl implements TaskService {
             return PageRequest.of(index, size);
         }
     }
+
     private Specification<Task> getSpecificationFromFilter(TaskFilterRequest taskFilter) {
         return TaskSpecification.filterTasks(taskFilter.getPriority(), taskFilter.getStatus(),
                 taskFilter.getTags(), taskFilter.getCreatorId(), taskFilter.getEndDate());
     }
+
     private Set<Tag> createTagsFromDto(TaskRequest taskDto, Task task) {
         return taskDto.getTags().stream()
                 .map(tag -> {

@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
-import ru.sushchenko.trelloclone.dto.checklist.checkitem.CheckItemRequest;
-import ru.sushchenko.trelloclone.dto.checklist.checkitem.CheckItemResponse;
+import ru.sushchenko.trelloclone.dto.checkitem.CheckItemRequest;
+import ru.sushchenko.trelloclone.dto.checkitem.CheckItemResponse;
 import ru.sushchenko.trelloclone.entity.CheckItem;
 
 @Component

@@ -29,21 +29,22 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepo commentRepo;
     private final TaskService taskService;
+
     @Override
     @Transactional
     public CommentResponse addCommentToTaskById(UUID taskId, CommentRequest commentDto, User currentUser) {
         Task task = taskService.getExistingTask(taskId);
-        if(taskService.checkIfAllowedToModifyTask(task, currentUser)) {
-            Comment comment = commentMapper.toEntity(commentDto);
-            comment.setTask(task);
-            comment.setCreator(currentUser);
-            enrichComment(comment);
-            Comment savedComment = commentRepo.save(comment);
-            log.info("Comment with id: {} created", savedComment.getId());
-            return commentMapper.toDto(savedComment);
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), taskId);
-        }
+
+        taskService.validatePermissions(task, currentUser);
+
+        Comment comment = commentMapper.toEntity(commentDto);
+        comment.setTask(task);
+        comment.setCreator(currentUser);
+        enrichComment(comment);
+
+        Comment savedComment = commentRepo.save(comment);
+        log.info("Comment with id: {} created", savedComment.getId());
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
@@ -57,34 +58,36 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentResponse updateCommentById(UUID id, CommentRequest commentDto, User currentUser) {
         Comment comment = getExistingComment(id);
-        if(checkIfCreator(comment, currentUser)) {
-            commentMapper.mergeDtoIntoEntity(commentDto, comment);
-            Comment savedComment = commentRepo.save(comment);
-            log.info("Comment with id: {} was edited", savedComment.getId());
-            return commentMapper.toDto(savedComment);
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
-        }
+
+        validateOwnership(comment, currentUser);
+
+        commentMapper.mergeDtoIntoEntity(commentDto, comment);
+        Comment savedComment = commentRepo.save(comment);
+        log.info("Comment with id: {} was edited", savedComment.getId());
+        return commentMapper.toDto(savedComment);
     }
 
     @Override
     @Transactional
     public void deleteCommentById(UUID id, User currentUser) {
         Comment comment = getExistingComment(id);
-        if(checkIfCreator(comment, currentUser)) {
-            commentRepo.deleteById(id);
-        } else {
-            throw new NotEnoughPermissionsException(currentUser.getId(), id);
-        }
+
+        validateOwnership(comment, currentUser);
+
+        commentRepo.deleteById(id);
     }
 
     private Comment getExistingComment(UUID id) {
         return commentRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
+
     private void enrichComment(Comment comment) {
         comment.setCreatedAt(new Date());
     }
-    private boolean checkIfCreator(Comment comment, User currentUser) {
-        return Objects.equals(comment.getCreator().getId(), currentUser.getId());
+
+    private void validateOwnership(Comment comment, User currentUser) {
+         if(!Objects.equals(comment.getCreator().getId(), currentUser.getId())) {
+             throw new NotEnoughPermissionsException(currentUser.getId(), comment.getId());
+         }
     }
 }

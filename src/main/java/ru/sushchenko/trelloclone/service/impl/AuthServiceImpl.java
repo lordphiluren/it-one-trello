@@ -31,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final UserMapper userMapper;
+
     @Override
     public AuthResponse attemptLogin(String username, String password) {
         Authentication auth = authenticationManager.authenticate(
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
                 .user(userMapper.toDto(principal.getUser()))
                 .build();
     }
+
     @Transactional
     @Override
     public void signUp(RegistrationRequest authRequest) {

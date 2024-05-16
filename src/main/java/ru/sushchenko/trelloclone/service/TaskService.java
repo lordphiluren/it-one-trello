@@ -22,6 +22,7 @@ public interface TaskService {
     TaskResponse addExecutorToTaskById(UUID id, UUID executorId, User currentUser);
     void removeExecutorFromTaskById(UUID id, UUID executorId, User currentUser);
     void deleteTaskById(UUID id, User creator);
-    boolean checkIfAllowedToModifyTask(Task task, User currentUser);
+    void validatePermissions(Task task, User currentUser);
+    void validateOwnership(Task task, User currentUser);
     Task getExistingTask(UUID id);
 }
