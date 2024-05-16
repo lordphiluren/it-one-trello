@@ -7,7 +7,7 @@ import org.springframework.security.core.AuthenticationException;
 
 @Getter
 @ResponseStatus(HttpStatus.UNAUTHORIZED)
-public class JwtAuthenticationException extends AuthenticationException {
+public class JwtAuthenticationException extends RuntimeException {
     public JwtAuthenticationException(String msg) {
         super(msg);
     }
