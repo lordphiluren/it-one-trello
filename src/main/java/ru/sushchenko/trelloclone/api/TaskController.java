@@ -20,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
+import ru.sushchenko.trelloclone.dto.task.TaskStatusRequest;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.AttachmentService;
 import ru.sushchenko.trelloclone.service.ChecklistService;
@@ -87,6 +88,16 @@ public class TaskController {
                                                           @AuthenticationPrincipal UserPrincipal userPrincipal) {
         taskService.deleteTaskById(id, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @Operation(summary = "Update task status by id if user is creator or executor")
+    @SecurityRequirement(name = "JWT")
+    @PutMapping("/{id}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<TaskResponse> updateTaskStatusById(@PathVariable UUID id,
+                                                             @Valid @RequestBody TaskStatusRequest taskStatusRequest,
+                                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(taskService.updateTaskStatusById(id, taskStatusRequest, userPrincipal.getUser()));
     }
 
     @Operation(summary = "Add comment to task by id")

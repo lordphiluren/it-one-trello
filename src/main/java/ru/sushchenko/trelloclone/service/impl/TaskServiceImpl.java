@@ -15,6 +15,7 @@ import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
+import ru.sushchenko.trelloclone.dto.task.TaskStatusRequest;
 import ru.sushchenko.trelloclone.entity.Tag;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
@@ -168,6 +169,23 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public Task getExistingTask(UUID id) {
         return taskRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
+    }
+
+    @Override
+    @Transactional
+    public TaskResponse updateTaskStatusById(UUID id, TaskStatusRequest taskStatusRequest, User currentUser) {
+        Task task = getExistingTask(id);
+
+        validatePermissions(task, currentUser);
+
+        task.setStatus(taskStatusRequest.getStatus());
+        task.setUpdatedAt(new Date());
+        task.setClosedAt(updateClosedAt(task));
+
+        Task savedTask = taskRepo.save(task);
+        log.info("Status for task with id: {} changed for - {}", savedTask.getId(), taskStatusRequest.getStatus());
+
+        return taskMapper.toDto(savedTask);
     }
 
     private Pageable getPageableFromFilter(TaskFilterRequest taskFilter) {

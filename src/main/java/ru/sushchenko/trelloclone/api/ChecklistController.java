@@ -83,4 +83,13 @@ public class ChecklistController {
         checkItemService.deleteCheckItemById(id, checkItemId, userPrincipal.getUser());
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @Operation(summary = "Update check item status for opposite one")
+    @SecurityRequirement(name = "JWT")
+    @PutMapping("/{id}/checkitems/{checkItemId}/status")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<CheckItemResponse> updateCheckItemStatus(@PathVariable UUID id,
+                                                  @PathVariable UUID checkItemId,
+                                                  @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return ResponseEntity.ok(checkItemService.updateCheckItemStatus(id, checkItemId, userPrincipal.getUser()));
+    }
 }

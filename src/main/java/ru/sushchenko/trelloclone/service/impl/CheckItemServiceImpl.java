@@ -92,6 +92,23 @@ public class CheckItemServiceImpl implements CheckItemService {
         log.info("Checkitem with id: {} deleted by user with id: {}", checkItemId, currentUser.getId());
     }
 
+    @Override
+    @Transactional
+    public CheckItemResponse updateCheckItemStatus(UUID checklistId, UUID checkItemId, User currentUser) {
+        CheckItem checkItemToUpdate = getExistingCheckItem(checkItemId);
+        validateChecklistOwnership(checklistId, checkItemToUpdate);
+
+        Task task = checkItemToUpdate.getChecklist().getTask();
+        taskService.validatePermissions(task, currentUser);
+
+        boolean currentStatus = checkItemToUpdate.isChecked();
+        checkItemToUpdate.setChecked(!currentStatus);
+
+        CheckItem updatedCheckItem = checkItemRepo.save(checkItemToUpdate);
+        log.info("Checkitem with id: {} updated by user with id: {}", checkItemId, currentUser.getId());
+        return checkItemMapper.toDto(updatedCheckItem);
+    }
+
     private CheckItem getExistingCheckItem(UUID id) {
         return checkItemRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }

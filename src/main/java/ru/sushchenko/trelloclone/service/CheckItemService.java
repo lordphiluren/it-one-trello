@@ -14,4 +14,6 @@ public interface CheckItemService {
     CheckItemResponse updateCheckItemById(UUID checklistId, UUID checkItemId,
                                           CheckItemRequest checkItemDto, User currentUser);
     void deleteCheckItemById(UUID checklistId, UUID checkItemId, User currentUser);
+
+    CheckItemResponse updateCheckItemStatus(UUID id, UUID checkItemId, User user);
 }

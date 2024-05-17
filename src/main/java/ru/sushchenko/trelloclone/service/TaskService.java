@@ -7,6 +7,7 @@ import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
+import ru.sushchenko.trelloclone.dto.task.TaskStatusRequest;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
 
@@ -25,4 +26,5 @@ public interface TaskService {
     void validatePermissions(Task task, User currentUser);
     void validateOwnership(Task task, User currentUser);
     Task getExistingTask(UUID id);
+    TaskResponse updateTaskStatusById(UUID id, TaskStatusRequest taskStatusRequest, User currentUser);
 }
