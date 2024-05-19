@@ -32,35 +32,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CheckItemServiceImpl implements CheckItemService {
     private final CheckItemRepo checkItemRepo;
-    private final ChecklistService checklistService;
     private final TaskService taskService;
-    private final ChecklistMapper checklistMapper;
     private final CheckItemMapper checkItemMapper;
 
-    @Override
-    @Transactional
-    public ChecklistResponse addCheckItemsToChecklistById(UUID checklistId, Set<CheckItemRequest> checkItemsDto,
-                                                          User currentUser) {
-        Checklist checklist = checklistService.getExistingChecklist(checklistId);
-        Task task = checklist.getTask();
-
-        taskService.validatePermissions(task, currentUser);
-
-        Set<CheckItem> checkItemsToAdd = checkItemsDto.stream()
-                .map(checkItemMapper::toEntity)
-                .peek(c -> c.setChecklist(checklist))
-                .collect(Collectors.toSet());
-
-        List<CheckItem> savedCheckItems = checkItemRepo.saveAll(checkItemsToAdd);
-
-        Set<CheckItem> checkItems = new HashSet<>(checklist.getCheckItems());
-        checkItems.addAll(savedCheckItems);
-        checklist.setCheckItems(checkItems);
-
-        log.info("{} check items added for checklist with id: {}", savedCheckItems.size(), checklist.getId());
-        return checklistMapper.toDto(checklist);
-
-    }
 
     @Override
     @Transactional

@@ -18,6 +18,7 @@ import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceMismatchException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.AttachmentMapper;
+import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,13 +34,14 @@ public class AttachmentServiceImpl implements AttachmentService {
     private final UploadService uploadService;
     private final AttachmentMapper attachMapper;
     private final TaskService taskService;
+    private final TaskMapper taskMapper;
 
     @Override
     @Transactional
     public List<AttachmentResponse> addAttachmentsToTask(UUID taskId,
                                                          List<MultipartFile> attachments,
                                                          User currentUser) {
-        Task task = taskService.getExistingTask(taskId);
+        Task task = taskMapper.toEntity(taskService.getTaskById(taskId));
 
         taskService.validatePermissions(task, currentUser);
 
@@ -63,7 +65,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     @Override
     @Transactional
     public void removeAttachmentFromTaskById(UUID taskId, UUID attachmentId, User currentUser) {
-        Task task = taskService.getExistingTask(taskId);
+        Task task = taskMapper.toEntity(taskService.getTaskById(taskId));
 
         taskService.validatePermissions(task, currentUser);
 

@@ -16,6 +16,7 @@ import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskStatusRequest;
+import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.Tag;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
@@ -28,6 +29,7 @@ import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceMismatchException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
+import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -39,6 +41,7 @@ public class TaskServiceImpl implements TaskService {
     private final TaskRepo taskRepo;
     private final TaskMapper taskMapper;
     private final UserService userService;
+    private final UserMapper userMapper;
     private final TagService tagService;
 
     @Override
@@ -90,7 +93,7 @@ public class TaskServiceImpl implements TaskService {
         validatePermissions(task, currentUser);
 
         task.setUpdatedAt(new Date());
-        task.setClosedAt(updateClosedAt(task));
+        task.setClosedAt(updateClosedAt(taskDto.getStatus()));
         task.setExecutors(createExecutorsFromDto(taskDto));
         task.setTags(createTagsFromDto(taskDto, task));
 
@@ -109,7 +112,9 @@ public class TaskServiceImpl implements TaskService {
 
         validateOwnership(task, currentUser);
 
-        User executor = userService.getExistingUser(executorId);
+        UserResponse executorDto = userService.getUserById(executorId);
+        User executor = userMapper.toEntity(executorDto);
+
         Set<User> executorsToUpdate = new HashSet<>(task.getExecutors());
         executorsToUpdate.add(executor);
 
@@ -166,8 +171,7 @@ public class TaskServiceImpl implements TaskService {
         }
     }
 
-    @Override
-    public Task getExistingTask(UUID id) {
+    private Task getExistingTask(UUID id) {
         return taskRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
@@ -180,7 +184,7 @@ public class TaskServiceImpl implements TaskService {
 
         task.setStatus(taskStatusRequest.getStatus());
         task.setUpdatedAt(new Date());
-        task.setClosedAt(updateClosedAt(task));
+        task.setClosedAt(updateClosedAt(taskStatusRequest.getStatus()));
 
         Task savedTask = taskRepo.save(task);
         log.info("Status for task with id: {} changed for - {}", savedTask.getId(), taskStatusRequest.getStatus());
@@ -216,12 +220,14 @@ public class TaskServiceImpl implements TaskService {
                 .collect(Collectors.toSet());
     }
 
-    private Date updateClosedAt(Task task) {
-        return task.getStatus() == Status.DONE ? new Date() : null;
+    private Date updateClosedAt(Status status) {
+        return status == Status.DONE ? new Date() : null;
     }
 
     private Set<User> createExecutorsFromDto(TaskRequest taskDto) {
-        return userService.getUsersByIdIn(taskDto.getExecutorIds());
+        return userService.getUsersByIdIn(taskDto.getExecutorIds()).stream()
+                .map(userMapper::toEntity)
+                .collect(Collectors.toSet());
     }
 
     private void enrichTask(Task task) {

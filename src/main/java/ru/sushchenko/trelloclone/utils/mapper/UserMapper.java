@@ -14,6 +14,7 @@ import ru.sushchenko.trelloclone.entity.User;
 @RequiredArgsConstructor
 public class UserMapper {
     private final ModelMapper modelMapper;
+    public User toEntity(UserResponse userDto) {return modelMapper.map(userDto, User.class);}
     public User toEntity(UserRequest userDto) {
         return modelMapper.map(userDto, User.class);
     }

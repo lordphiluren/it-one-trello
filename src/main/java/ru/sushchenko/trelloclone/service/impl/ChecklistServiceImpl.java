@@ -5,19 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.sushchenko.trelloclone.dto.checkitem.CheckItemRequest;
+import ru.sushchenko.trelloclone.dto.checklist.AddChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.entity.CheckItem;
 import ru.sushchenko.trelloclone.entity.Checklist;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
+import ru.sushchenko.trelloclone.repo.CheckItemRepo;
 import ru.sushchenko.trelloclone.repo.ChecklistRepo;
 import ru.sushchenko.trelloclone.service.ChecklistService;
 import ru.sushchenko.trelloclone.service.TaskService;
-import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.CheckItemMapper;
 import ru.sushchenko.trelloclone.utils.mapper.ChecklistMapper;
+import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
 
 import java.util.HashSet;
 import java.util.List;
@@ -32,16 +34,17 @@ public class ChecklistServiceImpl implements ChecklistService {
     private final ChecklistRepo checklistRepo;
     private final ChecklistMapper checklistMapper;
     private final TaskService taskService;
+    private final TaskMapper taskMapper;
+    private final CheckItemMapper checkItemMapper;
 
     @Override
     @Transactional
-    public ChecklistResponse addChecklistToTask(UUID taskId, ChecklistRequest checklistDto, User currentUser) {
-        Task task = taskService.getExistingTask(taskId);
+    public ChecklistResponse addChecklistToTask(UUID taskId, AddChecklistRequest checklistDto, User currentUser) {
+        Task task = taskMapper.toEntity(taskService.getTaskById(taskId));
 
         taskService.validatePermissions(task, currentUser);
 
         Checklist checklist = checklistMapper.toEntity(checklistDto);
-        checklist.setCheckItems(new HashSet<>());
         checklist.setTask(task);
 
         Checklist savedChecklist = checklistRepo.save(checklist);
@@ -83,7 +86,31 @@ public class ChecklistServiceImpl implements ChecklistService {
     }
 
     @Override
-    public Checklist getExistingChecklist(UUID id) {
+    @Transactional
+    public ChecklistResponse addCheckItemsToChecklistById(UUID checklistId, Set<CheckItemRequest> checkItemsDto,
+                                                          User currentUser) {
+        Checklist checklist = getExistingChecklist(checklistId);
+        Task task = checklist.getTask();
+
+        taskService.validatePermissions(task, currentUser);
+
+        Set<CheckItem> checkItemsToAdd = checkItemsDto.stream()
+                .map(checkItemMapper::toEntity)
+                .peek(c -> c.setChecklist(checklist))
+                .collect(Collectors.toSet());
+
+        Set<CheckItem> checkItems = new HashSet<>(checklist.getCheckItems());
+        checkItems.addAll(checkItemsToAdd);
+        checklist.setCheckItems(checkItems);
+
+        Checklist savedChecklist = checklistRepo.save(checklist);
+
+        log.info("{} check items added for checklist with id: {}", checkItemsToAdd.size(), savedChecklist.getId());
+        return checklistMapper.toDto(savedChecklist);
+
+    }
+
+    private Checklist getExistingChecklist(UUID id) {
         return checklistRepo.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
     }
 }

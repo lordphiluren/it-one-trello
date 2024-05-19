@@ -56,7 +56,7 @@ public class ChecklistController {
                                                                       @Valid @RequestBody Set<CheckItemRequest> checkItemsDto,
                                                                       @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(
-                checkItemService.addCheckItemsToChecklistById(id, checkItemsDto, userPrincipal.getUser())
+                checklistService.addCheckItemsToChecklistById(id, checkItemsDto, userPrincipal.getUser())
         );
     }
 

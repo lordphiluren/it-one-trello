@@ -25,6 +25,5 @@ public interface TaskService {
     void deleteTaskById(UUID id, User creator);
     void validatePermissions(Task task, User currentUser);
     void validateOwnership(Task task, User currentUser);
-    Task getExistingTask(UUID id);
     TaskResponse updateTaskStatusById(UUID id, TaskStatusRequest taskStatusRequest, User currentUser);
 }

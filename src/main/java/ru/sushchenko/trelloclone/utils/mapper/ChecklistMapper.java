@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+import ru.sushchenko.trelloclone.dto.checklist.AddChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.dto.checkitem.CheckItemResponse;
+import ru.sushchenko.trelloclone.entity.CheckItem;
 import ru.sushchenko.trelloclone.entity.Checklist;
 
 import java.util.Set;
@@ -18,6 +20,18 @@ public class ChecklistMapper {
     private final ModelMapper modelMapper;
     private final CheckItemMapper checkItemMapper;
 
+    public Checklist toEntity(AddChecklistRequest checklistDto) {
+        Checklist checklist = modelMapper.map(checklistDto, Checklist.class);
+
+        Set<CheckItem> checkItems = checklistDto.getCheckItems().stream()
+        .map(checkItemMapper::toEntity)
+        .peek(checkItem -> checkItem.setChecklist(checklist))
+        .collect(Collectors.toSet());
+
+        checklist.setCheckItems(checkItems);
+
+        return checklist;
+    }
     public Checklist toEntity(ChecklistRequest checklistDto) {
         return modelMapper.map(checklistDto, Checklist.class);
     }

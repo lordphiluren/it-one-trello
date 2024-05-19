@@ -15,6 +15,7 @@ import ru.sushchenko.trelloclone.service.TaskService;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.CommentMapper;
+import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
 
 import java.util.Date;
 import java.util.List;
@@ -29,11 +30,12 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepo commentRepo;
     private final TaskService taskService;
+    private final TaskMapper taskMapper;
 
     @Override
     @Transactional
     public CommentResponse addCommentToTaskById(UUID taskId, CommentRequest commentDto, User currentUser) {
-        Task task = taskService.getExistingTask(taskId);
+        Task task = taskMapper.toEntity(taskService.getTaskById(taskId));
 
         taskService.validatePermissions(task, currentUser);
 

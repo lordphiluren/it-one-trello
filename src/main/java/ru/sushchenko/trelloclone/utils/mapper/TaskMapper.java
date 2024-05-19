@@ -9,6 +9,7 @@ import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.dto.user.UserRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
+import ru.sushchenko.trelloclone.entity.Tag;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
 
@@ -35,6 +36,18 @@ public class TaskMapper {
         taskDto.setTags(tagsDto);
 
         return taskDto;
+    }
+    public Task toEntity(TaskResponse taskResponse) {
+        User creator = userMapper.toEntity(taskResponse.getCreator());
+        Set<User> executors = taskResponse.getExecutors().stream()
+                .map(userMapper::toEntity)
+                .collect(Collectors.toSet());
+
+        Task task = modelMapper.map(taskResponse, Task.class);
+        task.setCreator(creator);
+        task.setExecutors(executors);
+
+        return task;
     }
     public Task toEntity(TaskRequest taskDto) {
         return modelMapper.map(taskDto, Task.class);

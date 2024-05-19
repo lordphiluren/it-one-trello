@@ -59,17 +59,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<User> getUsersByIdIn(Set<UUID> ids) {
+    public Set<UserResponse> getUsersByIdIn(Set<UUID> ids) {
         Set<User> users = userRepo.findByIdIn(ids);
         if(users.isEmpty()) {
             throw new UserNotFoundException(ids);
         } else {
-            return users;
+            return users.stream().map(userMapper::toDto).collect(Collectors.toSet());
         }
     }
 
-    @Override
-    public User getExistingUser(UUID id) {
+    private User getExistingUser(UUID id) {
         return userRepo.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
     }

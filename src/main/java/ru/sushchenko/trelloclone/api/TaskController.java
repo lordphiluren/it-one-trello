@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
+import ru.sushchenko.trelloclone.dto.checklist.AddChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistRequest;
 import ru.sushchenko.trelloclone.dto.checklist.ChecklistResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
@@ -177,7 +178,7 @@ public class TaskController {
     @PostMapping("/{id}/checklists")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ChecklistResponse> addChecklistToTaskById(@PathVariable UUID id,
-                                                                    @Valid @RequestBody ChecklistRequest checklistDto,
+                                                                    @Valid @RequestBody AddChecklistRequest checklistDto,
                                                                     @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return new ResponseEntity<>(checklistService.addChecklistToTask(id, checklistDto, userPrincipal.getUser()),
                 HttpStatus.CREATED);

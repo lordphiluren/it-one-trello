@@ -9,8 +9,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public interface CheckItemService {
-    ChecklistResponse addCheckItemsToChecklistById(UUID checklistId, Set<CheckItemRequest> checkItemsDto,
-                                                   User currentUser);
     CheckItemResponse updateCheckItemById(UUID checklistId, UUID checkItemId,
                                           CheckItemRequest checkItemDto, User currentUser);
     void deleteCheckItemById(UUID checklistId, UUID checkItemId, User currentUser);
