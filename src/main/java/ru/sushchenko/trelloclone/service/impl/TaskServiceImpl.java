@@ -74,7 +74,8 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskResponse addTask(TaskRequest taskDto, User creator) {
-        Task task = createTaskFromDto(taskDto);
+        Task task = taskMapper.toEntity(taskDto);
+        enrichTask(task);
 
         task.setCreator(creator);
         task.setExecutors(createExecutorsFromDto(taskDto));
@@ -209,15 +210,19 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Set<Tag> createTagsFromDto(TaskRequest taskDto, Task task) {
-        return taskDto.getTags().stream()
-                .map(tag -> {
-                    TaskTagKey tagKey = new TaskTagKey(task.getId(), tag);
-                    Tag newTag = new Tag();
-                    newTag.setId(tagKey);
-                    newTag.setTask(task);
-                    return newTag;
-                })
-                .collect(Collectors.toSet());
+        if(taskDto.getTags() != null) {
+            return taskDto.getTags().stream()
+                    .map(tag -> {
+                        TaskTagKey tagKey = new TaskTagKey(task.getId(), tag);
+                        Tag newTag = new Tag();
+                        newTag.setId(tagKey);
+                        newTag.setTask(task);
+                        return newTag;
+                    })
+                    .collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
+        }
     }
 
     private Date updateClosedAt(Status status) {
@@ -241,12 +246,6 @@ public class TaskServiceImpl implements TaskService {
         task.setAttachmentsCount(0L);
         task.setCheckItemsCount(0L);
         task.setCheckItemsCheckedCount(0L);
-    }
-
-    private Task createTaskFromDto(TaskRequest taskDto) {
-        Task task = taskMapper.toEntity(taskDto);
-        enrichTask(task);
-        return task;
     }
 
     private boolean checkIfCreator(Task task, User currentUser) {

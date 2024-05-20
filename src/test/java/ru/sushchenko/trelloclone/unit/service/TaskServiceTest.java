@@ -5,20 +5,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
+import ru.sushchenko.trelloclone.entity.enums.Priority;
+import ru.sushchenko.trelloclone.entity.enums.Status;
 import ru.sushchenko.trelloclone.repo.TaskRepo;
 import ru.sushchenko.trelloclone.service.TagService;
 import ru.sushchenko.trelloclone.service.UserService;
-import ru.sushchenko.trelloclone.service.impl.TagServiceImpl;
 import ru.sushchenko.trelloclone.service.impl.TaskServiceImpl;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
-import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
 import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
+import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
 import java.util.*;
 
@@ -39,65 +39,115 @@ public class TaskServiceTest {
     private TaskServiceImpl taskService;
     @Mock
     private TagService tagService;
+    @Mock
+    private UserMapper userMapper;
+
+
+    private TaskRequest taskRequest;
+    private User creator;
+    private User executor;
+    private UserResponse executorResponse;
+    private Task task;
+    private Task savedTask;
+    private TaskResponse taskResponse;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
+        // mock task request dto
+        taskRequest = new TaskRequest();
+        taskRequest.setName("Test Task");
+        taskRequest.setDescription("Test Description");
+        taskRequest.setPriority(Priority.HIGH);
+        taskRequest.setStatus(Status.TODO);
+        taskRequest.setEndDate(new Date());
+        Set<UUID> executorIds = new HashSet<>();
+        executorIds.add(UUID.randomUUID());
+        taskRequest.setExecutorIds(executorIds);
+        Set<String> tags = new HashSet<>();
+        tags.add("Tag1");
+        taskRequest.setTags(tags);
+
+        creator = new User();
+        creator.setId(UUID.randomUUID());
+
+        UUID executorId = taskRequest.getExecutorIds().iterator().next();
+        executor = new User();
+        executor.setId(executorId);
+        executorResponse = new UserResponse();
+        executorResponse.setId(executorId);
+
+        task = new Task();
+        task.setId(UUID.randomUUID());
+        task.setName(taskRequest.getName());
+        task.setDescription(taskRequest.getDescription());
+        task.setPriority(taskRequest.getPriority());
+        task.setStatus(taskRequest.getStatus());
+        task.setEndDate(taskRequest.getEndDate());
+        task.setCreator(creator);
+        task.setExecutors(Set.of(executor));
+
+        // mock task returned by taskRepo.save
+        savedTask = new Task();
+        savedTask.setId(task.getId());
+        savedTask.setName(taskRequest.getName());
+        savedTask.setDescription(taskRequest.getDescription());
+        savedTask.setPriority(taskRequest.getPriority());
+        savedTask.setStatus(taskRequest.getStatus());
+        savedTask.setEndDate(taskRequest.getEndDate());
+        savedTask.setCreator(creator);
+        savedTask.setExecutors(Set.of(executor));
+
+        // mock task returned by taskMapper.toDto
+        taskResponse = new TaskResponse();
+        taskResponse.setId(savedTask.getId());
+        taskResponse.setName(savedTask.getName());
+        taskResponse.setDescription(savedTask.getDescription());
+        taskResponse.setPriority(savedTask.getPriority());
+        taskResponse.setStatus(savedTask.getStatus());
+        taskResponse.setEndDate(savedTask.getEndDate());
+        taskResponse.setExecutors(Set.of(executorResponse));
     }
 
     @Test
     void shouldGetAllTasks() {
-        Task task1 = new Task();
-        Task task2 = new Task();
-
-        TaskResponse taskResponse1 = new TaskResponse();
-        TaskResponse taskResponse2 = new TaskResponse();
-
-        when(taskRepo.findAll()).thenReturn(List.of(task1, task2));
-        when(taskMapper.toDto(task1)).thenReturn(taskResponse1);
-        when(taskMapper.toDto(task2)).thenReturn(taskResponse2);
+        when(taskRepo.findAll()).thenReturn(List.of(task, task));
+        when(taskMapper.toDto(any(Task.class))).thenReturn(taskResponse);
 
         List<TaskResponse> tasks = taskService.getAllTasks();
 
         assertNotNull(tasks);
         assertEquals(2, tasks.size());
-        verify(taskRepo, times(1)).findAll();
-        verify(taskMapper, times(1)).toDto(task1);
-        verify(taskMapper, times(1)).toDto(task2);
+        assertEquals(taskResponse, tasks.get(0));
+        assertEquals(taskResponse, tasks.get(1));
+
+        verify(taskRepo).findAll();
+        verify(taskMapper, times(2)).toDto(any(Task.class));
     }
 
     @Test
-    void shouldGetTaskDtoById() {
-        UUID taskId = UUID.randomUUID();
-        Task task = new Task();
+    void shouldGetTaskById() {
+        when(taskRepo.findById(any(UUID.class))).thenReturn(Optional.of(task));
+        when(taskMapper.toDto(any(Task.class))).thenReturn(taskResponse);
 
-        TaskResponse taskResponse = new TaskResponse();
-
-        when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        when(taskMapper.toDto(task)).thenReturn(taskResponse);
-
-        TaskResponse response = taskService.getTaskById(taskId);
+        TaskResponse response = taskService.getTaskById(UUID.randomUUID());
 
         assertNotNull(response);
-        verify(taskRepo, times(1)).findById(taskId);
-        verify(taskMapper, times(1)).toDto(task);
+        assertEquals(task.getId(), response.getId());
+        assertEquals(task.getName(), response.getName());
+
+        verify(taskRepo, times(1)).findById(any(UUID.class));
+        verify(taskMapper, times(1)).toDto(any(Task.class));
     }
 
     @Test
     void shouldValidatePermissions() {
-        Task task = new Task();
-        User currentUser = new User();
-
-        task.setCreator(currentUser);
-
-        assertDoesNotThrow(() -> taskService.validatePermissions(task, currentUser));
+        assertDoesNotThrow(() -> taskService.validatePermissions(task, creator));
     }
 
     @Test
     void shouldNotValidatePermissionsAndThrowException() {
-        Task task = new Task();
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
         User anotherUser1 = new User();
         anotherUser1.setId(UUID.randomUUID());
         User anotherUser2 = new User();
@@ -106,155 +156,106 @@ public class TaskServiceTest {
         task.setCreator(anotherUser1);
         task.setExecutors(Set.of(anotherUser2));
 
-        assertThrows(NotEnoughPermissionsException.class, () -> taskService.validatePermissions(task, currentUser));
+        assertThrows(NotEnoughPermissionsException.class, () -> taskService.validatePermissions(task, creator));
     }
 
     @Test
     void shouldValidateOwnership() {
-        Task task = new Task();
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
-
-        task.setCreator(currentUser);
-
-        assertDoesNotThrow(() -> taskService.validateOwnership(task, currentUser));
+        assertDoesNotThrow(() -> taskService.validateOwnership(task, creator));
     }
 
     @Test
     void shouldNotValidateOwnershipAndThrowException() {
-        Task task = new Task();
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
         User anotherUser = new User();
         anotherUser.setId(UUID.randomUUID());
         task.setCreator(anotherUser);
 
-        assertThrows(NotEnoughPermissionsException.class, () -> taskService.validateOwnership(task, currentUser));
+        assertThrows(NotEnoughPermissionsException.class, () -> taskService.validateOwnership(task, creator));
     }
 
     @Test
     void shouldAddTask() {
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setTags(Set.of("tag"));
-        User creator = new User();
-        Task task = new Task();
-        User executor = new User();
-        Set<User> executors = new HashSet<>();
-        executors.add(executor);
-
         when(taskMapper.toEntity(taskRequest)).thenReturn(task);
-        when(taskRepo.save(task)).thenReturn(task);
-        //when(userService.getUsersByIdIn(anySet())).thenReturn(executors);
-        when(taskMapper.toDto(task)).thenReturn(new TaskResponse());
+        when(taskRepo.save(task)).thenReturn(savedTask);
+        when(taskMapper.toDto(savedTask)).thenReturn(taskResponse);
 
-        TaskResponse response = taskService.addTask(taskRequest, creator);
+        when(userService.getUsersByIdIn(taskRequest.getExecutorIds())).thenReturn(Set.of(executorResponse));
+        when(userMapper.toEntity(executorResponse)).thenReturn(executor);
 
-        assertNotNull(response);
-        verify(taskRepo, times(1)).save(task);
-        verify(taskMapper, times(1)).toDto(task);
+        TaskResponse result = taskService.addTask(taskRequest, creator);
+
+        verify(taskMapper).toEntity(taskRequest);
+        verify(taskRepo).save(task);
+        verify(taskMapper).toDto(savedTask);
+        verify(userService).getUsersByIdIn(taskRequest.getExecutorIds());
+        verify(userMapper).toEntity(executorResponse);
+
+        assertNotNull(result);
+        assertEquals(taskResponse.getId(), result.getId());
+        assertEquals(taskResponse.getName(), result.getName());
     }
 
     @Test
     void shouldUpdateTaskById() {
-        UUID taskId = UUID.randomUUID();
-        TaskRequest taskRequest = new TaskRequest();
-        taskRequest.setTags(Set.of("tag"));
-        taskRequest.setName("new name");
+        String updatedName = "updated name";
+        taskRequest.setName(updatedName);
+        savedTask.setName(updatedName);
 
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
-        Task task = new Task();
-        task.setCreator(currentUser);
+        when(taskRepo.findById(any(UUID.class))).thenReturn(Optional.of(task));
+        when(userService.getUsersByIdIn(taskRequest.getExecutorIds())).thenReturn(Set.of(executorResponse));
+        when(taskRepo.save(task)).thenReturn(savedTask);
+        when(taskMapper.toDto(savedTask)).thenReturn(taskResponse);
+        doNothing().when(tagService).deleteTagsByTask(savedTask);
 
-        Task modifiedTask = new Task();
-        modifiedTask.setCreator(currentUser);
-        modifiedTask.setName(taskRequest.getName());
+        TaskResponse result = taskService.updateTaskById(task.getId(), taskRequest, creator);
 
-        when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        when(taskRepo.save(any(Task.class))).thenReturn(modifiedTask);
-        when(taskMapper.toDto(modifiedTask)).thenReturn(TaskResponse.builder().name(modifiedTask.getName()).build());
+        assertNotNull(result);
+        assertEquals(taskResponse.getId(), result.getId());
+        assertEquals(taskResponse.getName(), result.getName());
 
-        TaskResponse response = taskService.updateTaskById(taskId, taskRequest, currentUser);
-
-        assertEquals(taskRequest.getName(), response.getName());
-        assertNotNull(response);
-        verify(taskRepo, times(1)).save(any(Task.class));
-        verify(taskMapper, times(1)).toDto(modifiedTask);
+        verify(taskRepo).findById(task.getId());
+        verify(userService).getUsersByIdIn(taskRequest.getExecutorIds());
+        verify(taskMapper).mergeDtoIntoEntity(taskRequest, task);
+        verify(taskRepo).save(task);
+        verify(taskMapper).toDto(savedTask);
+        verify(tagService).deleteTagsByTask(savedTask);
     }
 
     @Test
     void shouldAddExecutorToTaskById() {
-        UUID taskId = UUID.randomUUID();
-        UUID executorId = UUID.randomUUID();
+        when(taskRepo.findById(any(UUID.class))).thenReturn(Optional.of(task));
+        when(userService.getUserById(any(UUID.class))).thenReturn(executorResponse);
+        when(userMapper.toEntity(executorResponse)).thenReturn(executor);
+        when(taskRepo.save(task)).thenReturn(savedTask);
+        when(taskMapper.toDto(savedTask)).thenReturn(taskResponse);
 
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
-
-        User executor = new User();
-        executor.setId(executorId);
-
-        Task task = new Task();
-        task.setCreator(currentUser);
-        task.setExecutors(new HashSet<>());
-
-        Task modifiedTask = new Task();
-        modifiedTask.setCreator(currentUser);
-        modifiedTask.setExecutors(Set.of(executor));
-
-        TaskResponse responseWithExecutor = TaskResponse.builder()
-                .executors(Set.of(UserResponse.builder().id(executor.getId()).build()))
-                .build();
-
-        when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        //when(userService.getUserById(executorId)).thenReturn(executor);
-        when(taskRepo.save(task)).thenReturn(modifiedTask);
-        when(taskMapper.toDto(modifiedTask)).thenReturn(responseWithExecutor);
-
-        TaskResponse response = taskService.addExecutorToTaskById(taskId, executorId, currentUser);
+        TaskResponse response = taskService.addExecutorToTaskById(task.getId(), executor.getId(), creator);
 
         assertEquals(1, response.getExecutors().size());
-        assertTrue(response.getExecutors().stream().anyMatch(userResponse -> userResponse.getId().equals(executorId)));
+        assertTrue(response.getExecutors().stream().anyMatch(userResponse -> userResponse.getId().equals(executor.getId())));
         verify(taskRepo, times(1)).save(task);
     }
 
     @Test
     void shouldRemoveExecutorFromTaskById() {
-        UUID taskId = UUID.randomUUID();
-        UUID executorId = UUID.randomUUID();
+        when(taskRepo.findById(any(UUID.class))).thenReturn(Optional.of(task));
+        when(taskRepo.save(task)).thenReturn(savedTask);
 
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
+        taskService.removeExecutorFromTaskById(task.getId(), executor.getId(), creator);
 
-        User executor = new User();
-        executor.setId(executorId);
+        assertFalse(task.getExecutors().contains(executor));
 
-        Task task = new Task();
-        task.setCreator(currentUser);
-        task.setExecutors(Set.of(executor));
-
-        when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        when(taskRepo.save(task)).thenReturn(task);
-
-        taskService.removeExecutorFromTaskById(taskId, executorId, currentUser);
-
-        assertEquals(0, task.getExecutors().size());
-        verify(taskRepo, times(1)).save(task);
+        verify(taskRepo).findById(task.getId());
+        verify(taskRepo).save(task);
     }
 
     @Test
     void shouldDeleteTaskById() {
-        User currentUser = new User();
-        currentUser.setId(UUID.randomUUID());
+        when(taskRepo.findById(any(UUID.class))).thenReturn(Optional.of(task));
 
-        UUID taskId = UUID.randomUUID();
-        Task task = new Task();
-        task.setId(taskId);
-        task.setCreator(currentUser);
+        taskService.deleteTaskById(UUID.randomUUID(), creator);
 
-        when(taskRepo.findById(taskId)).thenReturn(Optional.of(task));
-        taskService.deleteTaskById(taskId, currentUser);
-
-        verify(taskRepo, times(1)).findById(taskId);
-        verify(taskRepo, times(1)).deleteById(taskId);
+        verify(taskRepo, times(1)).findById(any(UUID.class));
+        verify(taskRepo, times(1)).deleteById(any(UUID.class));
     }
 }

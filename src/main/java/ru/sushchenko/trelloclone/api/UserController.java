@@ -39,9 +39,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @Operation(summary = "Partial update of user info by id")
+    @Operation(summary = "Update of user info by id")
     @SecurityRequirement(name = "JWT")
-    @PatchMapping(path = "/{id}")
+    @PutMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> updateUserInfo(@PathVariable UUID id,
                                             @Validated(UpdateValidation.class) @RequestBody UserRequest userDto,

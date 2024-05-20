@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
 import ru.sushchenko.trelloclone.dto.checklist.AddChecklistRequest;
@@ -27,6 +28,7 @@ import ru.sushchenko.trelloclone.service.AttachmentService;
 import ru.sushchenko.trelloclone.service.ChecklistService;
 import ru.sushchenko.trelloclone.service.CommentService;
 import ru.sushchenko.trelloclone.service.TaskService;
+import ru.sushchenko.trelloclone.utils.validation.UpdateValidation;
 
 import java.util.*;
 import java.util.UUID;
@@ -76,7 +78,7 @@ public class TaskController {
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<TaskResponse> updateTaskById(@PathVariable UUID id,
-                                                       @Valid @RequestBody TaskRequest taskDto,
+                                                       @Validated({UpdateValidation.class}) @RequestBody TaskRequest taskDto,
                                                        @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return ResponseEntity.ok(taskService.updateTaskById(id, taskDto, userPrincipal.getUser()));
     }
