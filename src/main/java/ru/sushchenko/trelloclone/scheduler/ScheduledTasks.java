@@ -26,7 +26,7 @@ public class ScheduledTasks {
     private final KafkaMessagingService kafkaMessagingService;
     private final UserRepo userRepo;
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(cron = "0 0 9 * * ?")
     public void reportUsersWithEndingTasks() {
         LocalDate today = LocalDate.now();
         ZonedDateTime startOfDay = today.atStartOfDay(ZoneId.systemDefault());
