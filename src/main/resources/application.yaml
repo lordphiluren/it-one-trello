@@ -17,8 +17,24 @@ spring:
     multipart:
       max-file-size: 25MB
       max-request-size: 25MB
+  kafka:
+    bootstrap-servers: localhost:29092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        acks: 1
+        spring:
+          json:
+            add:
+              type:
+                headers: false
+
 security:
   jwt:
     secret-key: veryLongAndVerySecretKeyNoBodyWillEverGuessItBecauseItIsUnbelievablySecretOhMyLordSomeOneTryToGuessIt
 upload-server:
   url: http://localhost:8081
+kafka-topic:
+    auth: auth-topic
+    notification: notification-topic

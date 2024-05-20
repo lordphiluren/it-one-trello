@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.sushchenko.trelloclone.dto.kafka.UserHotTaskDto;
 import ru.sushchenko.trelloclone.dto.user.UserRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
@@ -13,12 +14,13 @@ import ru.sushchenko.trelloclone.service.UserService;
 import ru.sushchenko.trelloclone.utils.exception.EntityAlreadyExistException;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.UserNotFoundException;
+import ru.sushchenko.trelloclone.utils.mapper.KafkaMapper;
 import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
+    private final KafkaMapper kafkaMapper;
 
     @Override
     public List<UserResponse> getAllUsers() {
@@ -67,6 +70,7 @@ public class UserServiceImpl implements UserService {
             return users.stream().map(userMapper::toDto).collect(Collectors.toSet());
         }
     }
+
 
     private User getExistingUser(UUID id) {
         return userRepo.findById(id)

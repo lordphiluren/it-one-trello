@@ -9,13 +9,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.sushchenko.trelloclone.dto.kafka.UserHotTaskDto;
 import ru.sushchenko.trelloclone.dto.user.UserRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
+import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
 import ru.sushchenko.trelloclone.service.UserService;
 import ru.sushchenko.trelloclone.utils.validation.UpdateValidation;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController

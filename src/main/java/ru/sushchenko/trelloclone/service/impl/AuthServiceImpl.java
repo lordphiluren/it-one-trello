@@ -31,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final UserMapper userMapper;
+    private final KafkaMessagingServiceImpl kafkaMessagingService;
 
     @Override
     public AuthResponse attemptLogin(String username, String password) {
@@ -55,6 +56,7 @@ public class AuthServiceImpl implements AuthService {
         try {
             User savedUser = userRepo.saveAndFlush(user);
             log.info("User with username : {} registered", savedUser.getUsername());
+            kafkaMessagingService.sendSignUpUser(savedUser);
         } catch (DataIntegrityViolationException e) {
             throw new EntityAlreadyExistException("User with this username or email already exists");
         }

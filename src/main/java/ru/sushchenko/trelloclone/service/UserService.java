@@ -1,5 +1,6 @@
 package ru.sushchenko.trelloclone.service;
 
+import ru.sushchenko.trelloclone.dto.kafka.UserHotTaskDto;
 import ru.sushchenko.trelloclone.dto.user.UserRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
 import ru.sushchenko.trelloclone.entity.User;
