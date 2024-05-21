@@ -294,9 +294,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Set<User> createExecutorsFromDto(TaskRequest taskDto) {
-        return userService.getUsersByIdIn(taskDto.getExecutorIds()).stream()
-                .map(userMapper::toEntity)
-                .collect(Collectors.toSet());
+        if(taskDto.getExecutorIds() == null || taskDto.getExecutorIds().isEmpty()) {
+            return new HashSet<>();
+        } else {
+            return userService.getUsersByIdIn(taskDto.getExecutorIds()).stream()
+                    .map(userMapper::toEntity)
+                    .collect(Collectors.toSet());
+        }
     }
 
     private void enrichTask(Task task) {
