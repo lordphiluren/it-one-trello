@@ -32,7 +32,7 @@ spring:
 
 security:
   jwt:
-    secret-key: veryLongAndVerySecretKeyNoBodyWillEverGuessItBecauseItIsUnbelievablySecretOhMyLordSomeOneTryToGuessIt
+    secret-key: ${JWT_TOKEN}
 upload-server:
   url: http://localhost:8081
 kafka-topic:

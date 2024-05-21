@@ -1,5 +1,29 @@
 version: '3.8'
 services:
+  mail-sender-service:
+    image: temique/mail-sender:0.0.1
+    depends_on:
+      - kafka
+    ports:
+      - "8082:8082"
+    environment:
+      - SERVER_PORT= 8082
+      - SPRING_MAIL_SENDER=${MAIL_SENDER_EMAIL}
+      - SPRING_MAIL_USERNAME=${MAIL_USERNAME}
+      - SPRING_MAIL_PASSWORD=${MAIL_PASSWORD}
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+
+  upload-service:
+    image: temique/upload-service:0.0.1
+    container_name: upload_service
+    ports:
+      - "8081:8081"
+    environment:
+      - SERVER_PORT=8081
+      - YANDEX-CLOUD_BUCKET-NAME=${BUCKET_NAME}
+      - YANDEX-CLOUD_ACCESS-KEY=${ACCESS_KEY}
+      - YANDEX-CLOUD_SECRET-KEY=${SECRET_KEY}
+
   zookeeper:
     image: confluentinc/cp-zookeeper:6.2.4
     container_name: zookeeper
@@ -25,9 +49,8 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
-
-  client-backend:
-    image: client:0.0.1
+  trello-clone-service:
+    image: trelloclone:0.0.1
     build:
       context: .
       dockerfile: Dockerfile
@@ -35,9 +58,13 @@ services:
       - "8080:8080"
     depends_on:
       - trello_pg
+      - upload-service
     environment:
       - SERVER_PORT= 8080
       - SPRING_DATASOURCE_URL=jdbc:postgresql://trello_pg/${DB_NAME}
+      - SECURITY_JWT_SECRET-KEY=${JWT_TOKEN}
+      - SPRING_KAFKA_BOOTSTRAP-SERVERS=kafka:9092
+      - UPLOAD-SERVER_URL=http://upload-service:8081
 
   trello_pg:
     image: postgres:alpine
@@ -53,6 +80,3 @@ services:
 
 volumes:
   db_volume:
-networks:
-  kafka-net:
-    driver: bridge
