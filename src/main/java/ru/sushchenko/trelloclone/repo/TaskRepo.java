@@ -22,4 +22,11 @@ public interface TaskRepo extends JpaRepository<Task, UUID>, JpaSpecificationExe
     Page<Task> findAll(Specification<Task> spec, Pageable pageable);
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, value = "task-entity-graph")
     Optional<Task> findById(UUID id);
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, value = "task-entity-graph")
+    List<Task> findByBoardId(UUID id);
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, value = "task-entity-graph")
+    List<Task> findByCreatorId(UUID id);
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, value = "task-entity-graph")
+    @Query("SELECT t FROM Task t LEFT JOIN FETCH t.executors ex WHERE ex.id = :id ")
+    List<Task> findByExecutorId(UUID id);
 }

@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class TaskSpecification {
     public static Specification<Task> filterTasks(Priority priority, Status status, Set<String> tags,
-                                                               UUID creatorId, Date endDate) {
+                                                               UUID creatorId, Date endDate, UUID boardId) {
         Specification<Task> spec = Specification.where(null);
         if(priority != null) {
             spec = spec.and(byPriority(priority));
@@ -26,6 +26,9 @@ public class TaskSpecification {
             spec = spec.and(tagsIn(tags));
         }
         if(creatorId != null) {
+            spec = spec.and(byCreatorId(creatorId));
+        }
+        if(boardId != null) {
             spec = spec.and(byCreatorId(creatorId));
         }
         if(endDate != null) {
@@ -43,6 +46,9 @@ public class TaskSpecification {
     }
     private static Specification<Task> byCreatorId(UUID creatorId) {
         return (((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("creator").get("id"), creatorId)));
+    }
+    private static Specification<Task> byBoardId(UUID boardId) {
+        return (((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("board").get("id"), boardId)));
     }
     private static Specification<Task> byPriority(Priority priority) {
         return ((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("priority"), priority));

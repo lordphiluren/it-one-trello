@@ -26,4 +26,9 @@ public interface TaskService {
     void validatePermissions(Task task, User currentUser);
     void validateOwnership(Task task, User currentUser);
     TaskResponse updateTaskStatusById(UUID id, TaskStatusRequest taskStatusRequest, User currentUser);
+    TaskResponse addTaskToBoardById(UUID id, TaskRequest taskDto, User user);
+    List<TaskResponse> getTasksByBoardId(UUID id);
+    List<TaskResponse> getTasksByBoardIdWithFilters(UUID boardId, TaskFilterRequest taskFilterRequest);
+    List<TaskResponse> getCreatedTasksByUserId(UUID id);
+    List<TaskResponse> getAssignedTasksByUserId(UUID id);
 }

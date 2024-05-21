@@ -14,4 +14,6 @@ public interface UserService {
     UserResponse getUserById(UUID id);
     UserResponse updateUserById(UUID id, UserRequest userDto, User currentUser);
     Set<UserResponse> getUsersByIdIn(Set<UUID> ids);
+
+    List<UserResponse> getUsersByBoardId(UUID boardId);
 }

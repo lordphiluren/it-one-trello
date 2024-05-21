@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.sushchenko.trelloclone.dto.attachments.AttachmentResponse;
+import ru.sushchenko.trelloclone.dto.board.BoardResponse;
 import ru.sushchenko.trelloclone.dto.comment.CommentRequest;
 import ru.sushchenko.trelloclone.dto.comment.CommentResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskFilterRequest;
@@ -17,6 +18,7 @@ import ru.sushchenko.trelloclone.dto.task.TaskRequest;
 import ru.sushchenko.trelloclone.dto.task.TaskResponse;
 import ru.sushchenko.trelloclone.dto.task.TaskStatusRequest;
 import ru.sushchenko.trelloclone.dto.user.UserResponse;
+import ru.sushchenko.trelloclone.entity.Board;
 import ru.sushchenko.trelloclone.entity.Tag;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
@@ -28,6 +30,7 @@ import ru.sushchenko.trelloclone.service.*;
 import ru.sushchenko.trelloclone.utils.exception.NotEnoughPermissionsException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceMismatchException;
 import ru.sushchenko.trelloclone.utils.exception.ResourceNotFoundException;
+import ru.sushchenko.trelloclone.utils.mapper.BoardMapper;
 import ru.sushchenko.trelloclone.utils.mapper.TaskMapper;
 import ru.sushchenko.trelloclone.utils.mapper.UserMapper;
 
@@ -43,6 +46,8 @@ public class TaskServiceImpl implements TaskService {
     private final UserService userService;
     private final UserMapper userMapper;
     private final TagService tagService;
+    private final BoardService boardService;
+    private final BoardMapper boardMapper;
 
     @Override
     public List<TaskResponse> getAllTasks() {
@@ -193,6 +198,65 @@ public class TaskServiceImpl implements TaskService {
         return taskMapper.toDto(savedTask);
     }
 
+    @Override
+    @Transactional
+    public TaskResponse addTaskToBoardById(UUID id, TaskRequest taskDto, User user) {
+        Board board = boardMapper.toEntity(boardService.getBoardById(id));
+
+        boardService.validatePermissions(board, user);
+
+        Task task = taskMapper.toEntity(taskDto);
+        enrichTask(task);
+
+        task.setCreator(user);
+        task.setBoard(board);
+        task.setExecutors(createExecutorsFromDto(taskDto));
+        task.setTags(createTagsFromDto(taskDto, task));
+
+        Task savedTask = taskRepo.save(task);
+        log.info("Task with id: {} created", savedTask.getId());
+        return taskMapper.toDto(savedTask);
+    }
+
+    @Override
+    public List<TaskResponse> getTasksByBoardId(UUID id) {
+        return taskRepo.findByBoardId(id).stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> getTasksByBoardIdWithFilters(UUID boardId, TaskFilterRequest taskFilterRequest) {
+        BoardResponse board = boardService.getBoardById(boardId);
+
+        List<Task> task;
+        if(taskFilterRequest != null) {
+            taskFilterRequest.setBoardId(board.getId());
+            Specification<Task> spec = getSpecificationFromFilter(taskFilterRequest);
+            Pageable pageable = getPageableFromFilter(taskFilterRequest);
+            task = taskRepo.findAll(spec, pageable).getContent();
+        } else {
+            task = taskRepo.findByBoardId(board.getId());
+        }
+        return task.stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> getCreatedTasksByUserId(UUID id) {
+        return taskRepo.findByCreatorId(id).stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskResponse> getAssignedTasksByUserId(UUID id) {
+        return taskRepo.findByExecutorId(id).stream()
+                .map(taskMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
     private Pageable getPageableFromFilter(TaskFilterRequest taskFilter) {
         int index = taskFilter.getPageIndex() != null ? taskFilter.getPageIndex() : 0;
         int size = taskFilter.getPageSize() != null ? taskFilter.getPageSize() : 50;
@@ -206,7 +270,7 @@ public class TaskServiceImpl implements TaskService {
 
     private Specification<Task> getSpecificationFromFilter(TaskFilterRequest taskFilter) {
         return TaskSpecification.filterTasks(taskFilter.getPriority(), taskFilter.getStatus(),
-                taskFilter.getTags(), taskFilter.getCreatorId(), taskFilter.getEndDate());
+                taskFilter.getTags(), taskFilter.getCreatorId(), taskFilter.getEndDate(), taskFilter.getBoardId());
     }
 
     private Set<Tag> createTagsFromDto(TaskRequest taskDto, Task task) {
@@ -230,9 +294,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private Set<User> createExecutorsFromDto(TaskRequest taskDto) {
-        return userService.getUsersByIdIn(taskDto.getExecutorIds()).stream()
-                .map(userMapper::toEntity)
-                .collect(Collectors.toSet());
+        if(taskDto.getExecutorIds() == null || taskDto.getExecutorIds().isEmpty()) {
+            return new HashSet<>();
+        } else {
+            return userService.getUsersByIdIn(taskDto.getExecutorIds()).stream()
+                    .map(userMapper::toEntity)
+                    .collect(Collectors.toSet());
+        }
     }
 
     private void enrichTask(Task task) {
