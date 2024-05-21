@@ -29,4 +29,5 @@ public class TaskFilterRequest {
     private Status status;
     private Date endDate;
     private UUID creatorId;
+    private UUID boardId;
 }

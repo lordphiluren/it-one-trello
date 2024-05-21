@@ -40,6 +40,6 @@ public class ScheduledTasks {
                 .toList();
 
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        log.info("All user hot tasks sent for users with tasks due today.");
+        log.info("All user hot tasks sent to users with tasks due today.");
     }
 }

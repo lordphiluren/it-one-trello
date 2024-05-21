@@ -37,6 +37,9 @@
             <column name="creator_id" type="uuid" >
                 <constraints nullable="false"/>
             </column>
+            <column name="board_id" type="uuid" >
+                <constraints nullable="false"/>
+            </column>
             <column name="comments_count" type="bigint" defaultValue="0"/>
             <column name="attachments_count" type="bigint" defaultValue="0"/>
             <column name="checkitems_count" type="bigint" defaultValue="0"/>
@@ -44,6 +47,11 @@
         </createTable>
         <addForeignKeyConstraint baseTableName="task" baseColumnNames="creator_id" constraintName="fk_task_users"
                                  referencedTableName="users"
+                                 referencedColumnNames="id"
+                                 onDelete="CASCADE"
+                                 onUpdate="CASCADE"/>
+        <addForeignKeyConstraint baseTableName="task" baseColumnNames="board_id" constraintName="fk_task_boards"
+                                 referencedTableName="board"
                                  referencedColumnNames="id"
                                  onDelete="CASCADE"
                                  onUpdate="CASCADE"/>

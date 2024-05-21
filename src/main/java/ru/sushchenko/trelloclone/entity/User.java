@@ -35,6 +35,10 @@ public class User {
 
     // Relations
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator", cascade = CascadeType.ALL)
+    private Set<Board> createdBoards;
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "members")
+    private Set<Board> memberedBoards;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "creator", cascade = CascadeType.ALL)
     private Set<Task> createdTasks;
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "executors")
     private Set<Task> assignedTasks;

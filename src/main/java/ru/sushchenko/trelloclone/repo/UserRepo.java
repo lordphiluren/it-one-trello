@@ -17,4 +17,6 @@ public interface UserRepo extends JpaRepository<User, UUID> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.assignedTasks at WHERE at.endDate >= :startOfDay AND at.endDate < :endOfDay " +
             "AND at.status != 'DONE'")
     Set<User> findUsersWithTasksDueToday(@Param("startOfDay") Date startOfDay, @Param("endOfDay") Date endOfDay);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.memberedBoards mb WHERE mb.id = :id ")
+    List<User> findMembersOfBoardByBoardId(UUID id);
 }

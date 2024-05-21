@@ -20,10 +20,12 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.sushchenko.trelloclone.dto.task.TaskRequest;
+import ru.sushchenko.trelloclone.entity.Board;
 import ru.sushchenko.trelloclone.entity.Task;
 import ru.sushchenko.trelloclone.entity.User;
 import ru.sushchenko.trelloclone.entity.enums.Priority;
 import ru.sushchenko.trelloclone.entity.enums.Status;
+import ru.sushchenko.trelloclone.repo.BoardRepo;
 import ru.sushchenko.trelloclone.repo.TaskRepo;
 import ru.sushchenko.trelloclone.repo.UserRepo;
 import ru.sushchenko.trelloclone.security.UserPrincipal;
@@ -57,6 +59,8 @@ public class TaskControllerTest {
     @Autowired
     private UserRepo userRepo;
     @Autowired
+    private BoardRepo boardRepo;
+    @Autowired
     private TaskRepo taskRepo;
     @Autowired
     private MockMvc mockMvc;
@@ -66,11 +70,13 @@ public class TaskControllerTest {
     private User user;
     private UserPrincipal userPrincipal;
     private Task task;
+    private Board board;
 
     @BeforeEach
     void setUp() {
         userRepo.deleteAll();
         taskRepo.deleteAll();
+        boardRepo.deleteAll();
 
         user = new User();
         user.setEmail("user@mail.com");
@@ -82,6 +88,12 @@ public class TaskControllerTest {
 
         userPrincipal = new UserPrincipal(user);
 
+        board = new Board();
+        board.setName("board name");
+
+        Board savedBoard = boardRepo.save(board);
+        board.setId(savedBoard.getId());
+
         task = new Task();
         task.setName("testTask");
         task.setCreator(user);
@@ -89,6 +101,7 @@ public class TaskControllerTest {
         task.setStatus(Status.TODO);
         task.setPriority(Priority.LOW);
         task.setCreatedAt(new Date());
+        task.setBoard(board);
 
         Task savedTask = taskRepo.save(task);
         task.setId(savedTask.getId());
@@ -120,28 +133,6 @@ public class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(task.getId().toString()))
                 .andExpect(jsonPath("$.creator.id").value(user.getId().toString()));
-    }
-    @Test
-    public void shouldAddTask() throws Exception {
-        TaskRequest taskRequest = TaskRequest.builder()
-                .name("testDto")
-                .executorIds(Set.of(user.getId()))
-                .priority(Priority.LOW)
-                .status(Status.TODO)
-                .endDate(new Date())
-                .tags(Set.of("tag"))
-                .build();
-
-        mockMvc.perform(post("/api/v1/tasks")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(taskRequest))
-                        .with(SecurityMockMvcRequestPostProcessors.authentication(
-                                new TestingAuthenticationToken(userPrincipal, null, "ROLE_USER")
-                        )))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.name").value("testDto"))
-                .andExpect(jsonPath("$.creator.id").value(userPrincipal.getUser().getId().toString()))
-                .andExpect(jsonPath("$.executors[0].id").value(user.getId().toString()));
     }
 
     @Test

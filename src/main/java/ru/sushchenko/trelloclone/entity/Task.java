@@ -64,6 +64,9 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "creator_id", referencedColumnName = "id")
     private User creator;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "board_id", referencedColumnName = "id")
+    private Board board;
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "executor_task",

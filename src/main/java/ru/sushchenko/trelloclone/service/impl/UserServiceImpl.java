@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
     private final UserRepo userRepo;
     private final UserMapper userMapper;
-    private final KafkaMapper kafkaMapper;
 
     @Override
     public List<UserResponse> getAllUsers() {
@@ -69,6 +68,13 @@ public class UserServiceImpl implements UserService {
         } else {
             return users.stream().map(userMapper::toDto).collect(Collectors.toSet());
         }
+    }
+
+    @Override
+    public List<UserResponse> getUsersByBoardId(UUID boardId) {
+        return userRepo.findMembersOfBoardByBoardId(boardId).stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
     }
 
 

@@ -64,15 +64,6 @@ public class TaskController {
         return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
-    @Operation(summary = "Add task")
-    @SecurityRequirement(name = "JWT")
-    @PostMapping("")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<TaskResponse> addTask(@Valid @RequestBody TaskRequest taskDto,
-                                                @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return new ResponseEntity<>(taskService.addTask(taskDto, userPrincipal.getUser()), HttpStatus.CREATED);
-    }
-
     @Operation(summary = "Update task by id if user is creator or executor")
     @SecurityRequirement(name = "JWT")
     @PutMapping("/{id}")

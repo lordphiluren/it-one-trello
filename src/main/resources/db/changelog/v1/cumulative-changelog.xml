@@ -5,6 +5,7 @@
                    https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
     <include file="changelogs/v1-user-changelog.xml" relativeToChangelogFile="true"/>
+    <include file="changelogs/v1-board-changelog.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/v1-task-changelog.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/v1-tags-changelog.xml" relativeToChangelogFile="true"/>
     <include file="changelogs/v1-comment-changelog.xml" relativeToChangelogFile="true"/>
