@@ -15,7 +15,7 @@
 - PostgreSQL
 - Liquibase
 - Apache Kafka
-- Testcontainers, JUnit, Mockito, WebMVC
+- Testcontainers, JUnit, Mockito, MockMVC
 - AWS SDK, Yandex Object Storage
 - Swagger
 - Docker - Dockefile, Docker Compose, Docker Hub
@@ -94,6 +94,6 @@ docker-compose up
 ```
 - Страница с документацией будет доступна по ссылке: http://localhost:8080/swagger-ui/index.html
 ## Возможности улучшить функционал
-- Возможность добавления разных досок
 - Кеширование запросов
 - Оптимизация запросов
+- Полное покрытие тестами
