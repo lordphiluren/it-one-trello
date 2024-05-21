@@ -11,9 +11,11 @@ BEGIN
         WHERE task.id = (SELECT task_id FROM checklist WHERE id = NEW.checklist_id);
         RETURN NEW;
     ELSIF (TG_OP = 'UPDATE') THEN
-        UPDATE task SET checkitems_checked_count = checkitems_checked_count + CASE WHEN NEW.is_checked THEN 1 ELSE 0 END
-        WHERE task.id = (SELECT task_id FROM checklist WHERE id = NEW.checklist_id);
-        RETURN NEW;
+          IF OLD.is_checked IS DISTINCT FROM NEW.is_checked THEN
+            UPDATE task SET checkitems_checked_count = checkitems_checked_count + CASE WHEN NEW.is_checked THEN 1 ELSE -1 END
+            WHERE task.id = (SELECT task_id FROM checklist WHERE id = NEW.checklist_id);
+            RETURN NEW;
+          END IF;
     END IF;
     RETURN NULL;
 END;
