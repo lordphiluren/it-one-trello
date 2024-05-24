@@ -107,7 +107,7 @@ public class BoardController {
 
     @Operation(summary = "Get board members")
     @SecurityRequirement(name = "JWT")
-    @PostMapping("/{id}/members")
+    @GetMapping("/{id}/members")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<List<UserResponse>> getBoardMembersById(@PathVariable UUID id) {
         return new ResponseEntity<>(userService.getUsersByBoardId(id),
